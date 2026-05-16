@@ -41,15 +41,15 @@ KB Search (ChromaDB + Keyword Hybrid)
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Docker Image |
+| Layer | Technology | Notes |
 |---|---|---|
-| Workflow Orchestration | n8n (self-hosted) | `n8nio/n8n:latest` |
-| Vector Store | ChromaDB | `chromadb/chroma:latest` |
-| LLM | GLM-5.1 (API) | Cloud API, no container needed |
-| Embeddings | BGE-m3 / all-MiniLM-L6-v2 | Built into Python app |
-| KB Processing | Python 3.12 (Pandas, LangChain) | `python:3.12-slim` |
-| Dashboard | Streamlit | Built into Python app |
-| Knowledge Base | Markdown + JSON | Version-controlled in repo |
+| Workflow Orchestration | n8n (self-hosted) | Docker container |
+| Vector Store | ChromaDB | Docker container, port 8100 |
+| LLM | GLM-5.1:cloud via Ollama | Local inference, OpenAI-compatible API |
+| Embeddings | all-MiniLM-L6-v2 | Built into Python app via sentence-transformers |
+| API Server | FastAPI + Uvicorn | Local process, port 8000 |
+| Dashboard | Streamlit | Local process, port 8501 |
+| Knowledge Base | Markdown + JSON + CSV + PDF + DOCX | Version-controlled in repo |
 
 ### Alternative Stack Comparison
 
@@ -64,17 +64,38 @@ See [project_plan.md](../project_plan.md) §5 for full tech stack justification 
 git clone https://github.com/stevenyy88/BOLDR.git
 cd BOLDR
 
-# Copy environment template
-cp .env.example .env
-# Edit .env with your API keys
+# Create Python virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r app/requirements.txt
 
-# Start everything with Docker Compose
-docker compose up -d
+# Copy environment template (pre-configured for local Ollama)
+cp .env.example .env
+
+# Start Docker services (ChromaDB + n8n)
+docker compose up -d chromadb n8n
+
+# Wait for services to be healthy
+sleep 10
+
+# Seed the knowledge base (93 chunks from 5 source documents)
+python scripts/index_kb.py --data-dir "../dataset" --chroma-host localhost --chroma-port 8100
+
+# Run tests (all 13 e2e tests should pass)
+python -m pytest app/tests/test_e2e.py -v
+
+# Start FastAPI server
+uvicorn app.api:app --host 0.0.0.0 --port 8000
+
+# (New terminal) Start Streamlit dashboard
+streamlit run app/dashboard/app.py --server.port 8501 --server.headless true
 
 # Access the services:
-# - n8n workflow editor: http://localhost:5678
-# - Streamlit dashboard: http://localhost:8501
-# - ChromaDB: http://localhost:8000
+# - FastAPI Intelligence API: http://localhost:8000/docs
+# - Streamlit Dashboard:       http://localhost:8501
+# - n8n Workflow Editor:        http://localhost:5678
+# - ChromaDB:                   http://localhost:8100
+# - Ollama LLM:                http://localhost:11434
 ```
 
 ---
