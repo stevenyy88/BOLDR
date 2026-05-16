@@ -18,8 +18,7 @@ from app.kb.schemas import (
     ClassificationResult, GapResult,
 )
 from app.kb.retriever import KBRetriever
-from app.classifier.intent import IntentClassifier
-from app.classifier.persona import PersonaTagger
+from app.classifier import classify_intent as classify_intent_fn, classify_persona as classify_persona_fn
 from app.intelligence.gap_detector import GapDetector
 from app.intelligence.theme_clusterer import ThemeClusterer
 from app.generator.reply import ReplyGenerator, KBAutoDrafter
@@ -47,8 +46,6 @@ app.add_middleware(
 
 # Initialize components
 retriever = KBRetriever()
-intent_classifier = IntentClassifier()
-persona_tagger = PersonaTagger()
 gap_detector = GapDetector()
 theme_clusterer = ThemeClusterer()
 reply_generator = ReplyGenerator()
@@ -155,15 +152,15 @@ async def process_intake(message: IntakeMessage):
     routing = channel_router.route(message.dict())
 
     # Classify intent and persona
-    classification = intent_classifier.classify(
-        message=message.message,
+    intent_result = classify_intent_fn(
         subject=message.subject,
+        body=message.message,
     )
 
     # Tag persona
-    persona_tag = persona_tagger.tag(
-        message=message.message,
+    persona_result = classify_persona_fn(
         subject=message.subject,
+        body=message.message,
         channel=message.channel,
     )
 
@@ -172,53 +169,63 @@ async def process_intake(message: IntakeMessage):
     best_score = kb_results[0]["score"] if kb_results else 0.0
 
     # Determine answerability
+    classification = ClassificationResult(
+        ticket_id=f"TKT-{hash(message.message) % 100000:05d}",
+        question_type=intent_result.question_type,
+        buyer_persona=persona_result.persona,
+        confidence=intent_result.confidence,
+        is_answerable=intent_result.routing_intent == "kb_answerable",
+        answerability_type=intent_result.routing_intent,
+        escalation_required=routing["escalation"],
+        escalation_reason=routing.get("escalation_reason"),
+    )
     answerability = gap_detector.determine_answerability(
         classification, kb_confidence=best_score
     )
 
     # Get SOP routing
-    sop_routing = sop_parser.get_routing(classification.question_type)
+    sop_routing = sop_parser.get_routing(intent_result.question_type)
 
     return IntentResponse(
         ticket_id=classification.ticket_id,
-        question_type=classification.question_type,
-        buyer_persona=persona_tag,
-        confidence=classification.confidence,
+        question_type=intent_result.question_type,
+        buyer_persona=persona_result.persona,
+        confidence=intent_result.confidence,
         is_answerable=answerability in (AnswerabilityResult.ANSWERABLE, AnswerabilityResult.NEEDS_SHOPIFY),
         answerability_type=answerability.value,
         escalation_required=routing["escalation"] or classification.escalation_required,
         escalation_reason=routing.get("escalation_reason") or classification.escalation_reason,
         sop_routing=sop_routing["source"] if sop_routing else "N/A",
-        needs_shopify=sop_parser.requires_shopify(classification.question_type),
+        needs_shopify=sop_parser.requires_shopify(intent_result.question_type),
     )
 
 
 @app.post("/api/v1/intent", response_model=IntentResponse)
 async def classify_intent(request: IntentRequest):
     """Classify intent and persona for a message (standalone endpoint)."""
-    classification = intent_classifier.classify(
-        message=request.message,
+    intent_result = classify_intent_fn(
         subject=request.subject,
+        body=request.message,
     )
 
-    persona_tag = persona_tagger.tag(
-        message=request.message,
+    persona_result = classify_persona_fn(
         subject=request.subject,
+        body=request.message,
     )
 
-    sop_routing = sop_parser.get_routing(classification.question_type)
+    sop_routing = sop_parser.get_routing(intent_result.question_type)
 
     return IntentResponse(
-        ticket_id=classification.ticket_id,
-        question_type=classification.question_type,
-        buyer_persona=persona_tag,
-        confidence=classification.confidence,
-        is_answerable=classification.is_answerable,
-        answerability_type=classification.answerability_type,
-        escalation_required=classification.escalation_required,
-        escalation_reason=classification.escalation_reason,
+        ticket_id=f"TKT-{hash(request.message) % 100000:05d}",
+        question_type=intent_result.question_type,
+        buyer_persona=persona_result.persona,
+        confidence=intent_result.confidence,
+        is_answerable=intent_result.routing_intent == "kb_answerable",
+        answerability_type=intent_result.routing_intent,
+        escalation_required=False,
+        escalation_reason=None,
         sop_routing=sop_routing["source"] if sop_routing else "N/A",
-        needs_shopify=sop_parser.requires_shopify(classification.question_type),
+        needs_shopify=sop_parser.requires_shopify(intent_result.question_type),
     )
 
 
