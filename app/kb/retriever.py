@@ -18,13 +18,13 @@ class KBRetriever:
 
     def __init__(
         self,
-        chroma_host: str = "localhost",
-        chroma_port: int = 8000,
+        chroma_host: str = None,
+        chroma_port: int = None,
         collection_name: str = "boldr_kb",
         confidence_threshold: float = 0.5,
     ):
-        self.chroma_host = chroma_host
-        self.chroma_port = chroma_port
+        self.chroma_host = chroma_host or os.environ.get("CHROMA_HOST", "localhost")
+        self.chroma_port = chroma_port or int(os.environ.get("CHROMA_PORT", "8100"))
         self.collection_name = collection_name
         self.confidence_threshold = confidence_threshold
         self._client = None
@@ -42,8 +42,12 @@ class KBRetriever:
     @property
     def collection(self):
         if self._collection is None:
+            embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+                model_name="all-MiniLM-L6-v2"
+            )
             self._collection = self.client.get_or_create_collection(
                 name=self.collection_name,
+                embedding_function=embedding_fn,
                 metadata={"description": "BOLDR Knowledge Base"},
             )
         return self._collection
