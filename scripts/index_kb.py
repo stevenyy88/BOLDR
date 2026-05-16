@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description="Index BOLDR Knowledge Base into ChromaDB")
     parser.add_argument(
         "--data-dir",
-        default=str(Path(__file__).parent.parent / "dataset"),
+        default=str(Path(__file__).parent.parent.parent / "dataset"),
         help="Path to dataset directory",
     )
     parser.add_argument("--chroma-host", default="localhost", help="ChromaDB host")

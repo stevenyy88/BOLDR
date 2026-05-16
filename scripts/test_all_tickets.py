@@ -26,7 +26,7 @@ from app.routing.sop_parser import SOPParser
 
 def main():
     parser = argparse.ArgumentParser(description="Test all 70 BOLDR tickets through the pipeline")
-    parser.add_argument("--data-dir", default=str(Path(__file__).parent.parent / "dataset"))
+    parser.add_argument("--data-dir", default=str(Path(__file__).parent.parent.parent / "dataset"))
     args = parser.parse_args()
 
     print("=" * 60)

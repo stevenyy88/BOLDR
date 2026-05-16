@@ -17,7 +17,6 @@ services:
       - N8N_PAYLOAD_SIZE_MAX=16
     depends_on:
       - chromadb
-      - app
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5678/healthz || exit 1"]
@@ -37,35 +36,11 @@ services:
       - CHROMA_PORT=8000
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v2/heartbeat || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
-
-  app:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
-    container_name: boldr_app
-    ports:
-      - "8000:8000"
-      - "8501:8501"
-    volumes:
-      - ./kb:/app/kb
-      - ./data:/app/data
-    environment:
-      - CHROMA_HOST=chromadb
-      - CHROMA_PORT=8000  # Internal Docker port (chromadb container)
-      - GLM_API_KEY=${GLM_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - KB_DATA_DIR=/app/kb
-      - DATA_DIR=/app/data
-      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.5}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-    depends_on:
-      - chromadb
-    restart: unless-stopped
+      retries: 5
+      start_period: 30s
 
 volumes:
   n8n_data:

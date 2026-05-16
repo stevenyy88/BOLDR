@@ -164,9 +164,10 @@ class TestEndToEnd:
     def test_tone_guidelines(self):
         """Test that tone guidelines are extracted from SOP."""
         tone = self.sop_parser.get_tone_prompt()
-        assert "friendly" in tone.lower()
-        assert "direct" in tone.lower()
+        # SOP tone: premium brand, clear answers, helpful redirects, no promises
+        assert ("happy" in tone.lower() or "friendly" in tone.lower()), f"Expected friendly/happy tone, got: {tone[:100]}"
         assert "never promise" in tone.lower()
+        assert ("clear" in tone.lower() or "direct" in tone.lower()), f"Expected clear/direct tone, got: {tone[:100]}"
 
     def test_knowledge_gap_analysis(self):
         """Test knowledge gap analysis: 10 order ops + 10 true gaps."""

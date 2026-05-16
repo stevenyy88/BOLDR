@@ -30,7 +30,7 @@ class ReplyGenerator:
     ):
         self.model = model
         self.api_key = api_key or os.getenv("GLM_API_KEY", "")
-        self.api_base = api_base or os.getenv("GLM_API_BASE", "https://open.bigmodel.cn/api/paas/v4")
+        self.api_base = api_base or os.getenv("GLM_BASE_URL", os.getenv("GLM_API_BASE", "https://open.bigmodel.cn/api/paas/v4"))
         self.fallback_model = os.getenv("FALLBACK_MODEL", "claude-3-haiku-20240307")
 
     def draft_reply(

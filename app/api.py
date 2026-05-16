@@ -9,13 +9,16 @@ import logging
 import os
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app.kb.schemas import (
-    QuestionType, BuyerPersona, AnswerabilityResult, Channel,
-    ClassificationResult, GapResult,
+    QuestionType, BuyerPersona, AnswerabilityResult, TicketChannel,
+    ClassificationResult,
 )
 from app.kb.retriever import KBRetriever
 from app.classifier import classify_intent as classify_intent_fn, classify_persona as classify_persona_fn
@@ -45,7 +48,10 @@ app.add_middleware(
 )
 
 # Initialize components
-retriever = KBRetriever()
+retriever = KBRetriever(
+    chroma_host=os.environ.get("CHROMA_HOST", "localhost"),
+    chroma_port=int(os.environ.get("CHROMA_PORT", "8000")),
+)
 gap_detector = GapDetector()
 theme_clusterer = ThemeClusterer()
 reply_generator = ReplyGenerator()
@@ -149,31 +155,32 @@ async def process_intake(message: IntakeMessage):
     This is the main endpoint called by n8n workflows.
     """
     # Route the message (check for escalation)
-    routing = channel_router.route(message.dict())
+    routing = channel_router.route(message.model_dump())
 
     # Classify intent and persona
     intent_result = classify_intent_fn(
         subject=message.subject,
-        body=message.message,
+        message_body=message.message,
     )
 
     # Tag persona
     persona_result = classify_persona_fn(
         subject=message.subject,
-        body=message.message,
-        channel=message.channel,
+        message_body=message.message,
     )
 
     # Check KB for answer
     kb_results = retriever.search(message.message, n_results=3)
-    best_score = kb_results[0]["score"] if kb_results else 0.0
+    best_score = kb_results["confidence"] if isinstance(kb_results, dict) else (kb_results[0]["score"] if kb_results else 0.0)
+    kb_best_match = kb_results.get("best_match", {}) if isinstance(kb_results, dict) else {}
+    kb_answer = kb_best_match.get("content", "") if isinstance(kb_best_match, dict) else ""
 
     # Determine answerability
     classification = ClassificationResult(
         ticket_id=f"TKT-{hash(message.message) % 100000:05d}",
         question_type=intent_result.question_type,
         buyer_persona=persona_result.persona,
-        confidence=intent_result.confidence,
+        confidence=intent_result.question_type_confidence,
         is_answerable=intent_result.routing_intent == "kb_answerable",
         answerability_type=intent_result.routing_intent,
         escalation_required=routing["escalation"],
@@ -186,11 +193,26 @@ async def process_intake(message: IntakeMessage):
     # Get SOP routing
     sop_routing = sop_parser.get_routing(intent_result.question_type)
 
+    # Draft reply if answerable
+    reply_data = None
+    if kb_answer and answerability in (AnswerabilityResult.ANSWERABLE, AnswerabilityResult.NEEDS_SHOPIFY):
+        reply_data = reply_generator.draft_reply(
+            ticket_id=classification.ticket_id,
+            customer_name=message.sender_name or "there",
+            subject=message.subject,
+            question_type=intent_result.question_type,
+            persona=persona_result.persona,
+            kb_answer=kb_answer,
+            sop_routing=sop_routing["source"] if sop_routing else "N/A",
+            channel=message.channel,
+            confidence=best_score,
+        )
+
     return IntentResponse(
         ticket_id=classification.ticket_id,
         question_type=intent_result.question_type,
         buyer_persona=persona_result.persona,
-        confidence=intent_result.confidence,
+        confidence=intent_result.question_type_confidence,
         is_answerable=answerability in (AnswerabilityResult.ANSWERABLE, AnswerabilityResult.NEEDS_SHOPIFY),
         answerability_type=answerability.value,
         escalation_required=routing["escalation"] or classification.escalation_required,
@@ -205,12 +227,12 @@ async def classify_intent(request: IntentRequest):
     """Classify intent and persona for a message (standalone endpoint)."""
     intent_result = classify_intent_fn(
         subject=request.subject,
-        body=request.message,
+        message_body=request.message,
     )
 
     persona_result = classify_persona_fn(
         subject=request.subject,
-        body=request.message,
+        message_body=request.message,
     )
 
     sop_routing = sop_parser.get_routing(intent_result.question_type)
@@ -219,7 +241,7 @@ async def classify_intent(request: IntentRequest):
         ticket_id=f"TKT-{hash(request.message) % 100000:05d}",
         question_type=intent_result.question_type,
         buyer_persona=persona_result.persona,
-        confidence=intent_result.confidence,
+        confidence=intent_result.question_type_confidence,
         is_answerable=intent_result.routing_intent == "kb_answerable",
         answerability_type=intent_result.routing_intent,
         escalation_required=False,
@@ -233,7 +255,7 @@ async def classify_intent(request: IntentRequest):
 async def search_kb(request: KBSearchRequest):
     """Search the knowledge base."""
     results = retriever.search(request.query, n_results=request.n_results)
-    return {"results": results, "count": len(results)}
+    return results
 
 
 @app.post("/api/v1/reply/draft")

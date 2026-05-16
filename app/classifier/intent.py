@@ -473,7 +473,13 @@ def classify_intent_llm(
     user_content = f"Subject: {subject}\n\nMessage:\n{message_body}"
 
     try:
-        client = OpenAI(api_key=api_key, base_url=base_url)
+        client = OpenAI(api_key=api_key, base_url=base_url, timeout=30.0)
+        # Ollama doesn't support response_format=json_object, so we omit it
+        # and instruct the model to return JSON via the system prompt instead.
+        extra_kwargs = {}
+        if "bigmodel" in (base_url or ""):
+            # Only use response_format for the official GLM API
+            extra_kwargs["response_format"] = {"type": "json_object"}
         response = client.chat.completions.create(
             model=model,
             messages=[
@@ -481,9 +487,36 @@ def classify_intent_llm(
                 {"role": "user", "content": user_content},
             ],
             temperature=0.0,
-            response_format={"type": "json_object"},
+            **extra_kwargs,
         )
         raw = response.choices[0].message.content.strip()
+        # Handle GLM-5.1:cloud reasoning mode — content may be empty
+        # with reasoning in a separate field; or content may contain <think> tags
+        if not raw:
+            # Try to extract from reasoning field if available
+            reasoning = getattr(response.choices[0].message, 'reasoning_content', None) or getattr(response.choices[0].message, 'reasoning', None)
+            if reasoning:
+                # Reasoning mode: content is empty, extract JSON from reasoning
+                import re
+                json_match = re.search(r'\{[^}]+\}', reasoning)
+                if json_match:
+                    raw = json_match.group(0)
+                else:
+                    logger.warning("LLM returned empty content with reasoning but no JSON; falling back to rule-based.")
+                    return classify_intent_rule_based(subject, message_body)
+            else:
+                logger.warning("LLM returned empty content; falling back to rule-based.")
+                return classify_intent_rule_based(subject, message_body)
+        # Strip <think>...</think> blocks if present (GLM reasoning mode)
+        import re
+        raw = re.sub(r'<think>.*?</think>', '', raw, flags=re.DOTALL).strip()
+        # Extract JSON from response (model may wrap in markdown)
+        json_match = re.search(r'```json\s*(.*?)\s*```', raw, re.DOTALL)
+        if json_match:
+            raw = json_match.group(1)
+        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        if json_match:
+            raw = json_match.group(0)
         parsed = json.loads(raw)
 
         qt = parsed.get("question_type", "")

@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from typing import Optional
 
-from app.kb.schemas import Channel
+from app.kb.schemas import TicketChannel
 
 logger = logging.getLogger(__name__)
 

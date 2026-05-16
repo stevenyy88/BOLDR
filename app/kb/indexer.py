@@ -16,6 +16,7 @@ Author: Steve Ng, Founder and CEO - Digital Futures Consultancy LLP
 
 import csv
 import logging
+import os
 import re
 from dataclasses import asdict
 from pathlib import Path
@@ -81,7 +82,7 @@ class KBIndexer:
 
     def __init__(self, data_dir: str | Path | None = None):
         if data_dir is None:
-            data_dir = Path(__file__).resolve().parent.parent.parent / "dataset"
+            data_dir = Path(os.environ.get('KB_DATA_DIR', str(Path(__file__).resolve().parent.parent.parent / "dataset")))
         self.data_dir = Path(data_dir)
 
         # File paths
