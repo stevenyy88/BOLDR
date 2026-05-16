@@ -1,0 +1,185 @@
+{
+  "name": "BOLDR WhatsApp Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-whatsapp",
+      "name": "WhatsApp Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "notes": "Receives WhatsApp Business API messages via webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftExpression": "",
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.object ?? '' }}",
+              "rightValue": "whatsapp_business_account",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-whatsapp-verify",
+      "name": "Verify WhatsApp Event",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 340],
+      "notes": "Filter: only process valid WhatsApp Business messages"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "message",
+              "value": "={{ $json.entry[0].changes[0].value.messages[0].text.body ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "whatsapp",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.entry[0].changes[0].value.messages[0].from ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.entry[0].changes[0].value.contacts[0].profile.name ?? $json.entry[0].changes[0].value.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "timestamp",
+              "value": "={{ $json.entry[0].changes[0].value.messages[0].timestamp ?? $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "thread_id",
+              "value": "={{ $json.entry[0].changes[0].value.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "wa_message_id",
+              "value": "={{ $json.entry[0].changes[0].value.messages[0].id ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize-whatsapp",
+      "name": "Normalize WhatsApp Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300],
+      "notes": "Map WhatsApp Business API payload to BOLDR intake schema"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.wa_message_id\n}) }}",
+        "options": {}
+      },
+      "id": "http-forward-whatsapp",
+      "name": "Forward to Intelligence Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "notes": "POST normalized WhatsApp message to main BOLDR Intelligence Loop webhook"
+    }
+  ],
+  "connections": {
+    "WhatsApp Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify WhatsApp Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify WhatsApp Event": {
+      "main": [
+        [
+          {
+            "node": "Normalize WhatsApp Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize WhatsApp Data": {
+      "main": [
+        [
+          {
+            "node": "Forward to Intelligence Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "BOLDR"
+    },
+    {
+      "name": "intake"
+    },
+    {
+      "name": "whatsapp"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "boldr-n8n"
+  },
+  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
+  "description": "BOLDR WhatsApp Intake: WhatsApp Business API webhook → verify → normalize → forward to Intelligence Loop"
+}

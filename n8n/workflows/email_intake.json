@@ -1,0 +1,159 @@
+{
+  "name": "BOLDR Email Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "folder": "INBOX",
+        "format": "resolved",
+        "options": {
+          "fetchUnreadOnl": true
+        }
+      },
+      "id": "gmail-trigger",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 340],
+      "notes": "Polls Gmail inbox for new BOLDR-related emails"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "message",
+              "value": "={{ $json.text ?? $json.snippet ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "email",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.from.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.from.name ?? $json.from.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "timestamp",
+              "value": "={{ $json.internalDate ?? $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "thread_id",
+              "value": "={{ $json.threadId ?? $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "subject",
+              "value": "={{ $json.subject ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a8",
+              "name": "email_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize-email",
+      "name": "Normalize Email Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 340],
+      "notes": "Map Gmail fields to BOLDR intake schema"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  subject: $json.subject,\n  source_id: $json.email_id\n}) }}",
+        "options": {}
+      },
+      "id": "http-forward-email",
+      "name": "Forward to Intelligence Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 340],
+      "notes": "POST normalized email to main BOLDR Intelligence Loop webhook"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Normalize Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Email Data": {
+      "main": [
+        [
+          {
+            "node": "Forward to Intelligence Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "BOLDR"
+    },
+    {
+      "name": "intake"
+    },
+    {
+      "name": "email"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "boldr-n8n"
+  },
+  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
+  "description": "BOLDR Email Intake: Gmail trigger → normalize → forward to Intelligence Loop webhook"
+}

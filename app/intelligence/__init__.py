@@ -1,0 +1,1 @@
+"""BOLDR Intelligence Package — Gap detection, theme clustering, marketing briefs."""

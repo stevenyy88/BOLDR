@@ -1,0 +1,1 @@
+"""BOLDR Generator Package — Reply drafting, KB auto-drafting, brand voice."""

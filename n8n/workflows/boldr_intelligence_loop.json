@@ -1,0 +1,1034 @@
+{
+  "name": "BOLDR Intelligence Loop",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "boldr-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-intake",
+      "name": "Multi-Channel Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "notes": "Receives normalized messages from all intake channels"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "raw_message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "={{ $json.body.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.body.sender_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.body.sender_name }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "timestamp",
+              "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "thread_id",
+              "value": "={{ $json.body.thread_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize",
+      "name": "Normalize Intake Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 340],
+      "notes": "Extract and normalize common fields from any channel"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/intent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.raw_message }}\",\n  \"channel\": \"{{ $json.channel }}\",\n  \"sender_id\": \"{{ $json.sender_id }}\"\n}",
+        "options": {}
+      },
+      "id": "http-intent",
+      "name": "Extract Intent + Persona",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 340],
+      "notes": "Calls Python app to classify intent and assign persona"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "intent",
+              "value": "={{ $json.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "persona",
+              "value": "={{ $json.persona }}",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "number"
+            },
+            {
+              "id": "b4",
+              "name": "sub_intents",
+              "value": "={{ $json.sub_intents }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-intent-output",
+      "name": "Capture Intent Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 340],
+      "notes": "Flatten intent extraction response for downstream routing"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/kb/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.intent + ' ' + $json.raw_message }}\",\n  \"persona\": \"{{ $json.persona }}\",\n  \"top_k\": 3\n}",
+        "options": {}
+      },
+      "id": "http-kb-search",
+      "name": "KB Search (ChromaDB)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 340],
+      "notes": "Search ChromaDB for matching knowledge entries"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "label": "Has Answer",
+              "value": "answer_found"
+            },
+            {
+              "label": "Knowledge Gap",
+              "value": "knowledge_gap"
+            },
+            {
+              "label": "Shopify Lookup",
+              "value": "shopify_lookup"
+            },
+            {
+              "label": "Needs Human",
+              "value": "needs_human"
+            }
+          ]
+        },
+        "dataPropertyName": "={{ $json.result_type }}"
+      },
+      "id": "switch-route",
+      "name": "Route by Result Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1340, 340],
+      "notes": "Route based on KB search outcome: answer, gap, Shopify, or human"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/generate/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\",\n  \"persona\": \"{{ $('Capture Intent Output').item.json.persona }}\",\n  \"kb_context\": {{ JSON.stringify($json.documents) }},\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"brand_voice\": \"BOLDR\"\n}",
+        "options": {}
+      },
+      "id": "http-draft-reply",
+      "name": "Draft BOLDR Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 200],
+      "notes": "Generate reply in BOLDR brand voice using KB context"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Approval Queue",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "thread_id": "={{ $('Normalize Intake Data').item.json.thread_id }}",
+            "channel": "={{ $('Normalize Intake Data').item.json.channel }}",
+            "sender_id": "={{ $('Normalize Intake Data').item.json.sender_id }}",
+            "sender_name": "={{ $('Normalize Intake Data').item.json.sender_name }}",
+            "intent": "={{ $('Capture Intent Output').item.json.intent }}",
+            "persona": "={{ $('Capture Intent Output').item.json.persona }}",
+            "drafted_reply": "={{ $json.reply }}",
+            "confidence": "={{ $('Capture Intent Output').item.json.confidence }}",
+            "kb_source": "={{ $json.source_ids }}",
+            "status": "pending_approval",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-approval-queue",
+      "name": "Queue for Human Approval",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1820, 200],
+      "notes": "Append drafted reply to Google Sheets approval queue"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/kb/gap",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $('Normalize Intake Data').item.json.raw_message }}\",\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\",\n  \"persona\": \"{{ $('Capture Intent Output').item.json.persona }}\",\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"confidence\": {{ $('Capture Intent Output').item.json.confidence }}\n}",
+        "options": {}
+      },
+      "id": "http-flag-gap",
+      "name": "Flag Knowledge Gap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 360],
+      "notes": "Log knowledge gap to Python app for future KB entry creation"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Knowledge Gaps",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "gap_id": "={{ $json.gap_id }}",
+            "query": "={{ $('Normalize Intake Data').item.json.raw_message }}",
+            "intent": "={{ $('Capture Intent Output').item.json.intent }}",
+            "persona": "={{ $('Capture Intent Output').item.json.persona }}",
+            "channel": "={{ $('Normalize Intake Data').item.json.channel }}",
+            "status": "open",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-gap-log",
+      "name": "Log Gap to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1820, 360],
+      "notes": "Log knowledge gap to Google Sheets for tracking"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/shopify/lookup",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $('Normalize Intake Data').item.json.raw_message }}\",\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\"\n}",
+        "options": {}
+      },
+      "id": "http-shopify-lookup",
+      "name": "Shopify Product Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 520],
+      "notes": "Look up product/stock/pricing info from Shopify"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftExpression": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.has_answer }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-shopify-answerable",
+      "name": "Shopify Answerable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1800, 520],
+      "notes": "If Shopify returned answer, draft reply; else flag as gap"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/generate/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\",\n  \"persona\": \"{{ $('Capture Intent Output').item.json.persona }}\",\n  \"kb_context\": {{ JSON.stringify($json.products) }},\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"brand_voice\": \"BOLDR\"\n}",
+        "options": {}
+      },
+      "id": "http-draft-shopify-reply",
+      "name": "Draft Shopify Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2020, 460],
+      "notes": "Draft reply using Shopify product data in BOLDR voice"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Approval Queue",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "thread_id": "={{ $('Normalize Intake Data').item.json.thread_id }}",
+            "channel": "={{ $('Normalize Intake Data').item.json.channel }}",
+            "sender_id": "={{ $('Normalize Intake Data').item.json.sender_id }}",
+            "sender_name": "={{ $('Normalize Intake Data').item.json.sender_name }}",
+            "intent": "={{ $('Capture Intent Output').item.json.intent }}",
+            "persona": "={{ $('Capture Intent Output').item.json.persona }}",
+            "drafted_reply": "={{ $json.reply }}",
+            "confidence": "={{ $('Capture Intent Output').item.json.confidence }}",
+            "kb_source": "shopify",
+            "status": "pending_approval",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-shopify-approval",
+      "name": "Queue Shopify Reply for Approval",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2240, 460],
+      "notes": "Append Shopify-sourced reply to approval queue"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/kb/gap",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $('Normalize Intake Data').item.json.raw_message }}\",\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\",\n  \"persona\": \"{{ $('Capture Intent Output').item.json.persona }}\",\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"type\": \"shopify_unresolved\",\n  \"confidence\": {{ $('Capture Intent Output').item.json.confidence }}\n}",
+        "options": {}
+      },
+      "id": "http-shopify-gap",
+      "name": "Flag Shopify Gap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2020, 580],
+      "notes": "Log unresolved Shopify query as knowledge gap"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Knowledge Gaps",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "gap_id": "={{ $json.gap_id }}",
+            "query": "={{ $('Normalize Intake Data').item.json.raw_message }}",
+            "intent": "={{ $('Capture Intent Output').item.json.intent }}",
+            "persona": "={{ $('Capture Intent Output').item.json.persona }}",
+            "channel": "={{ $('Normalize Intake Data').item.json.channel }}",
+            "type": "shopify_unresolved",
+            "status": "open",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-shopify-gap-log",
+      "name": "Log Shopify Gap to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2240, 580],
+      "notes": "Log Shopify gap to Google Sheets"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/generate/reply",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"intent\": \"{{ $('Capture Intent Output').item.json.intent }}\",\n  \"persona\": \"{{ $('Capture Intent Output').item.json.persona }}\",\n  \"kb_context\": [],\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"brand_voice\": \"BOLDR\",\n  \"human_handoff\": true\n}",
+        "options": {}
+      },
+      "id": "http-human-handoff",
+      "name": "Generate Human Handoff Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 680],
+      "notes": "Generate polite handoff message for complex queries needing human"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Human Escalation",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "thread_id": "={{ $('Normalize Intake Data').item.json.thread_id }}",
+            "channel": "={{ $('Normalize Intake Data').item.json.channel }}",
+            "sender_id": "={{ $('Normalize Intake Data').item.json.sender_id }}",
+            "sender_name": "={{ $('Normalize Intake Data').item.json.sender_name }}",
+            "intent": "={{ $('Capture Intent Output').item.json.intent }}",
+            "persona": "={{ $('Capture Intent Output').item.json.persona }}",
+            "original_message": "={{ $('Normalize Intake Data').item.json.raw_message }}",
+            "handoff_reply": "={{ $json.reply }}",
+            "status": "escalated",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-escalation",
+      "name": "Log Human Escalation",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1820, 680],
+      "notes": "Log escalation to human queue in Google Sheets"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/kb/auto-draft",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"trigger\": \"gap_resolved\",\n  \"gap_id\": \"{{ $json.gap_id }}\"\n}",
+        "options": {}
+      },
+      "id": "http-auto-draft-kb",
+      "name": "Auto-Draft KB Entry",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 580],
+      "notes": "Triggered when a knowledge gap is resolved; auto-drafts a new KB entry"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "KB Drafts",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "draft_id": "={{ $json.draft_id }}",
+            "title": "={{ $json.title }}",
+            "content": "={{ $json.content }}",
+            "source_gap_id": "={{ $json.source_gap_id }}",
+            "status": "draft",
+            "created_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-kb-draft",
+      "name": "Log KB Draft to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 580],
+      "notes": "Log auto-drafted KB entry to Google Sheets for review"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "daysOfWeek",
+              "weeksInterval": 1,
+              "daysOfWeek": [
+                1
+              ]
+            },
+            {
+              "field": "time",
+              "hour": 9
+            }
+          ]
+        }
+      },
+      "id": "trigger-weekly",
+      "name": "Weekly Theme Clustering Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 800],
+      "notes": "Every Monday at 9am — trigger theme clustering"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/cluster/themes",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"period\": \"weekly\",\n  \"date\": \"{{ $now.toISO() }}\"\n}",
+        "options": {}
+      },
+      "id": "http-weekly-cluster",
+      "name": "Run Theme Clustering",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 800],
+      "notes": "Call Python app to cluster this week's themes"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Weekly Themes",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "week": "={{ $json.week_label }}",
+            "themes": "={{ JSON.stringify($json.themes) }}",
+            "top_intents": "={{ JSON.stringify($json.top_intents) }}",
+            "gap_count": "={{ $json.gap_count }}",
+            "generated_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-weekly-themes",
+      "name": "Log Weekly Themes",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 800],
+      "notes": "Log weekly theme clusters to Google Sheets"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "months": 1
+            },
+            {
+              "field": "time",
+              "hour": 9
+            }
+          ]
+        }
+      },
+      "id": "trigger-monthly",
+      "name": "Monthly Marketing Brief Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 960],
+      "notes": "1st of every month at 9am — generate marketing brief"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/briefs/marketing",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"period\": \"monthly\",\n  \"date\": \"{{ $now.toISO() }}\"\n}",
+        "options": {}
+      },
+      "id": "http-monthly-brief",
+      "name": "Generate Marketing Brief",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 960],
+      "notes": "Call Python app to generate monthly marketing brief"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Marketing Briefs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "month": "={{ $json.month_label }}",
+            "brief_summary": "={{ $json.summary }}",
+            "top_themes": "={{ JSON.stringify($json.top_themes) }}",
+            "content_opportunities": "={{ JSON.stringify($json.content_opportunities) }}",
+            "gap_insights": "={{ JSON.stringify($json.gap_insights) }}",
+            "generated_at": "={{ $now.toISO() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-monthly-brief",
+      "name": "Log Marketing Brief",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 960],
+      "notes": "Log monthly marketing brief to Google Sheets"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"received\",\n  \"thread_id\": \"{{ $('Normalize Intake Data').item.json.thread_id }}\",\n  \"message\": \"Your message has been processed. We'll get back to you shortly!\"\n}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Send Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2060, 200],
+      "notes": "Return confirmation to webhook caller"
+    }
+  ],
+  "connections": {
+    "Multi-Channel Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Intake Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Intake Data": {
+      "main": [
+        [
+          {
+            "node": "Extract Intent + Persona",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Intent + Persona": {
+      "main": [
+        [
+          {
+            "node": "Capture Intent Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Intent Output": {
+      "main": [
+        [
+          {
+            "node": "KB Search (ChromaDB)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "KB Search (ChromaDB)": {
+      "main": [
+        [
+          {
+            "node": "Route by Result Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Result Type": {
+      "main": [
+        [
+          {
+            "node": "Draft BOLDR Reply",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Flag Knowledge Gap",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Shopify Product Lookup",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Human Handoff Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft BOLDR Reply": {
+      "main": [
+        [
+          {
+            "node": "Queue for Human Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Queue for Human Approval": {
+      "main": [
+        [
+          {
+            "node": "Send Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag Knowledge Gap": {
+      "main": [
+        [
+          {
+            "node": "Log Gap to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shopify Product Lookup": {
+      "main": [
+        [
+          {
+            "node": "Shopify Answerable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shopify Answerable?": {
+      "main": [
+        [
+          {
+            "node": "Draft Shopify Reply",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Flag Shopify Gap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Shopify Reply": {
+      "main": [
+        [
+          {
+            "node": "Queue Shopify Reply for Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flag Shopify Gap": {
+      "main": [
+        [
+          {
+            "node": "Log Shopify Gap to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Human Handoff Reply": {
+      "main": [
+        [
+          {
+            "node": "Log Human Escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-Draft KB Entry": {
+      "main": [
+        [
+          {
+            "node": "Log KB Draft to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Theme Clustering Trigger": {
+      "main": [
+        [
+          {
+            "node": "Run Theme Clustering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Theme Clustering": {
+      "main": [
+        [
+          {
+            "node": "Log Weekly Themes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monthly Marketing Brief Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Marketing Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Marketing Brief": {
+      "main": [
+        [
+          {
+            "node": "Log Marketing Brief",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "BOLDR"
+    },
+    {
+      "name": "intelligence-loop"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "boldr-n8n"
+  },
+  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
+  "description": "BOLDR Intelligence Loop: Multi-channel intake → Intent extraction + persona → KB search → Draft reply / Flag gap / Shopify lookup → Human approval → Auto-draft KB entries → Weekly clustering → Monthly marketing brief"
+}

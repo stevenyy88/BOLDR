@@ -1,0 +1,75 @@
+# BOLDR Self-Improving Customer Intelligence Engine
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (sensitive - customer tickets, KB documents)
+data/raw/
+data/*.csv
+data/*.docx
+data/*.pdf
+!data/.gitkeep
+
+# ChromaDB (vector store - generated)
+chroma_db/
+chroma_data/
+
+# n8n data (contains credentials)
+n8n_data/
+
+# Logs
+*.log
+logs/
+
+# Docker volumes
+docker_data/
+
+# Model cache
+models/
+.cache/
+
+# Secrets
+secrets/
+credentials/
+*.pem
+*.key
+service-account*.json
+
+# Test artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit
+.streamlit/secrets.toml

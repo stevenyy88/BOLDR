@@ -1,0 +1,185 @@
+{
+  "name": "BOLDR Instagram DM Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-dm",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-instagram",
+      "name": "Instagram DM Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "notes": "Receives Instagram DM events via Meta webhook subscription"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftExpression": "",
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.object ?? '' }}",
+              "rightValue": "instagram",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-instagram-verify",
+      "name": "Verify Instagram Event",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 340],
+      "notes": "Filter: only process valid Instagram events"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "message",
+              "value": "={{ $json.entry[0].messaging[0].message.text ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "instagram_dm",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.entry[0].messaging[0].sender.id ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "timestamp",
+              "value": "={{ $json.entry[0].messaging[0].timestamp ?? $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "thread_id",
+              "value": "={{ $json.entry[0].messaging[0].sender.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "ig_message_id",
+              "value": "={{ $json.entry[0].messaging[0].message.mid ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize-instagram",
+      "name": "Normalize Instagram Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300],
+      "notes": "Map Instagram webhook payload to BOLDR intake schema"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.ig_message_id\n}) }}",
+        "options": {}
+      },
+      "id": "http-forward-instagram",
+      "name": "Forward to Intelligence Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "notes": "POST normalized Instagram DM to main BOLDR Intelligence Loop webhook"
+    }
+  ],
+  "connections": {
+    "Instagram DM Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verify Instagram Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Instagram Event": {
+      "main": [
+        [
+          {
+            "node": "Normalize Instagram Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Instagram Data": {
+      "main": [
+        [
+          {
+            "node": "Forward to Intelligence Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "BOLDR"
+    },
+    {
+      "name": "intake"
+    },
+    {
+      "name": "instagram"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "boldr-n8n"
+  },
+  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
+  "description": "BOLDR Instagram DM Intake: Meta webhook → verify → normalize → forward to Intelligence Loop"
+}

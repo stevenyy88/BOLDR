@@ -1,0 +1,169 @@
+{
+  "name": "BOLDR Chat Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-chat",
+      "name": "Chat Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "notes": "Receives chat messages from BOLDR website/app widget"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "message",
+              "value": "={{ $json.body.message ?? $json.body.text ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "={{ $json.body.channel ?? 'chat' }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.body.sender_id ?? $json.body.user_id ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.body.sender_name ?? $json.body.user_name ?? 'anonymous' }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "timestamp",
+              "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "thread_id",
+              "value": "={{ $json.body.thread_id ?? $json.body.session_id ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "source_id",
+              "value": "={{ $json.body.message_id ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-normalize-chat",
+      "name": "Normalize Chat Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 340],
+      "notes": "Map chat widget payload to BOLDR intake schema"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://boldr-app:8000/api/v1/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.source_id\n}) }}",
+        "options": {}
+      },
+      "id": "http-forward-chat",
+      "name": "Forward to Intelligence Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 340],
+      "notes": "POST normalized chat message to main BOLDR Intelligence Loop webhook"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"received\",\n  \"message\": \"Your message has been received. We'll respond shortly!\"\n}",
+        "options": {}
+      },
+      "id": "webhook-response-chat",
+      "name": "Respond to Chat Widget",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [900, 340],
+      "notes": "Return immediate confirmation to chat widget"
+    }
+  ],
+  "connections": {
+    "Chat Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Chat Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Chat Data": {
+      "main": [
+        [
+          {
+            "node": "Forward to Intelligence Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forward to Intelligence Loop": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat Widget",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    {
+      "name": "BOLDR"
+    },
+    {
+      "name": "intake"
+    },
+    {
+      "name": "chat"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "boldr-n8n"
+  },
+  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
+  "description": "BOLDR Chat Intake: Website/app chat webhook → normalize → forward to Intelligence Loop → respond to widget"
+}
