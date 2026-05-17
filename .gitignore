@@ -73,3 +73,5 @@ htmlcov/
 
 # Streamlit
 .streamlit/secrets.toml
+# Team reports (internal)
+docs/team_report.md
