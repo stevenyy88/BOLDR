@@ -2,7 +2,7 @@
 
 **Project:** BOLDR — Self-Improving Customer Intelligence Engine  
 **Track:** ECHELON 2026 AI Workflow Competition — REVENUE ROCKET  
-**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP  
+**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)  
 **Date:** 2026-05-17  
 **Status:** ✅ DEMO-READY — All systems operational, all tests passing
 
@@ -90,7 +90,7 @@ Each test validates a specific pipeline capability:
 ```
 ============================================================
 BOLDR Ticket Pipeline Test — 70 Tickets
-Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP
+Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H) · https://DigitalFutures.Asia
 ============================================================
 
 📊 Loaded 70 tickets
@@ -141,7 +141,7 @@ curl http://localhost:8000/api/v1/health
     "status": "healthy",
     "service": "BOLDR Intelligence Engine",
     "version": "1.0.0",
-    "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP"
+    "author": "Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)"
 }
 ```
 
@@ -509,4 +509,4 @@ Repository: https://github.com/stevenyy88/BOLDR
 
 ---
 
-*Prepared by Digital Futures Consultancy LLP for ECHELON 2026 AI Workflow Competition*
+*Prepared by Digital Futures Consultancy LLP (T17LL1937H, incorporated 10 Oct 2017, Singapore) · https://DigitalFutures.Asia for ECHELON 2026 AI Workflow Competition*

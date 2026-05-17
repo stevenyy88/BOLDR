@@ -1,6 +1,6 @@
 # BOLDR Pipeline End-to-End Verification Report
 
-**Author:** Steve Ng, Founder and CEO - Digital Futures Consultancy LLP  
+**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)  
 **Date:** 2026-05-17  
 **Status:** ✅ VERIFIED — All core pipelines operational
 

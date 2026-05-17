@@ -3,7 +3,7 @@
 **Project:** BOLDR Self-Improving Customer Intelligence Engine  
 **Track:** ECHELON 2026 AI Workflow Competition — REVENUE ROCKET  
 **Date:** 2026-05-17  
-**Prepared by:** Excel (CTPO), Digital Futures Consultancy LLP
+**Prepared by:** Excel (CTPO), Digital Futures Consultancy LLP (T17LL1937H)
 
 ---
 
@@ -344,5 +344,5 @@ Each agent is rated on: **Speed**, **Quality**, **Reliability**, **Collaboration
 
 ---
 
-*Report prepared by Excel (CTPO), Digital Futures Consultancy LLP*  
+*Report prepared by Excel (CTPO), Digital Futures Consultancy LLP (T17LL1937H)*  
 *Date: 2026-05-17*

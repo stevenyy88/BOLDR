@@ -2,7 +2,7 @@
 
 **Project:** BOLDR — Self-Improving Customer Intelligence Engine  
 **Track:** REVENUE ROCKET — Sales, Marketing, and Customer Acquisition  
-**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP  
+**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)  
 **Date:** 2026-05-17  
 **Duration:** 5:00 (300 seconds)
 
@@ -259,4 +259,4 @@
 
 ---
 
-*Prepared by Digital Futures Consultancy LLP for ECHELON 2026 AI Workflow Competition*
+*Prepared by Digital Futures Consultancy LLP (T17LL1937H, incorporated 10 Oct 2017, Singapore) · https://DigitalFutures.Asia for ECHELON 2026 AI Workflow Competition*

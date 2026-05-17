@@ -1,6 +1,6 @@
 # BOLDR Setup and Installation Guide
 
-> Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP
+> Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H) · https://DigitalFutures.Asia
 
 ## Prerequisites
 

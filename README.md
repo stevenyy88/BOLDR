@@ -2,7 +2,7 @@
 
 > **ECHELON 2026 AI Workflow Competition** | Track: REVENUE ROCKET — Sales, Marketing, and Customer Acquisition
 
-**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP
+**Author:** Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H) · https://DigitalFutures.Asia
 
 ---
 
@@ -255,9 +255,26 @@ The BOLDR challenge provides 6 files:
 
 ---
 
+## 🏢 About Digital Futures Consultancy LLP
+
+| Detail | Value |
+|--------|-------|
+| **Company Name** | Digital Futures Consultancy LLP ("Digital Futures") |
+| **Registration No** | T17LL1937H |
+| **Incorporation Date** | 10 October 2017 |
+| **Registered In** | Singapore |
+| **Website** | https://DigitalFutures.Asia |
+| **Founder & CEO** | Steve Ng |
+| **Email** | Steve@DigitalFutures.Asia |
+| **Mobile** | +65 9634 8084 |
+
+Digital Futures is an AI-Native and AI-First Digital Transformation and AI Consultancy, regionally recognised across Singapore, Vietnam, and Indonesia. We specialise in Financial Services, Government, Startups, and Enterprises — accelerating AI adoption through secure, governed, and scalable delivery.
+
+---
+
 ## 📜 License
 
-This project is developed for the ECHELON 2026 AI Workflow Competition. All code is the intellectual property of Digital Futures Consultancy LLP.
+This project is developed for the ECHELON 2026 AI Workflow Competition. All code is the intellectual property of Digital Futures Consultancy LLP (T17LL1937H, incorporated 10 Oct 2017, Singapore).
 
 ---
 
@@ -265,8 +282,8 @@ This project is developed for the ECHELON 2026 AI Workflow Competition. All code
 
 - **BOLDR Supply Co.** — Challenge partner providing the real-world problem and sample data
 - **e27 / ECHELON** — Competition organiser
-- **Digital Futures Consultancy LLP** — Development team
+- **Digital Futures Consultancy LLP** (T17LL1937H, Singapore) — Development team
 
 ---
 
-*Built with 💼 by the Digital Futures Consultancy Secure Agentic Software Delivery Pod*
+*Built with 💼 by the Digital Futures Consultancy Secure Agentic Software Delivery Pod — https://DigitalFutures.Asia*
