@@ -23,18 +23,18 @@ n8n Workflow → Intent Extraction → Persona Classification
     ↓
 KB Search (ChromaDB + Keyword Hybrid)
     ↓
-┌─────────────────┐     ┌──────────────────┐
-│  Answer Found?   │─Yes→│  Draft Reply      │→ Human Approval Queue → Send
-└────────┬──────────┘     └──────────────────┘
+┌──────────────────┐     ┌──────────────────┐
+│  Answer Found?   │─Yes→│  Draft Reply     │→ Human Approval Queue → Send
+└────────┬─────────┘     └──────────────────┘
          │ No
          ↓
 ┌─────────────────┐     ┌──────────────────┐
-│  Gap Detection   │────→│  CS Escalation    │→ Human Resolves → KB Auto-Draft
+│  Gap Detection  │────→│  CS Escalation   │→ Human Resolves → KB Auto-Draft
 └─────────────────┘     └──────────────────┘
          ↓
-┌─────────────────┐
+┌──────────────────┐
 │ Theme Clustering │→ Weekly Theme Report → Monthly Marketing Brief
-└─────────────────┘
+└──────────────────┘
 ```
 
 ---
