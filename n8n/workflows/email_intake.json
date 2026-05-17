@@ -1,27 +1,28 @@
 {
+  "updatedAt": "2026-05-17T05:49:15.997Z",
+  "createdAt": "2026-05-17T00:47:42.450Z",
+  "id": "Qj8sWSe9Enz7EH5Q",
   "name": "BOLDR Email Intake",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
-        "pollTimes": {
-          "item": [
-            {
-              "mode": "everyMinute"
-            }
-          ]
-        },
-        "folder": "INBOX",
-        "format": "resolved",
-        "options": {
-          "fetchUnreadOnl": true
-        }
+        "httpMethod": "POST",
+        "path": "email",
+        "responseMode": "responseNode",
+        "options": {}
       },
-      "id": "gmail-trigger",
-      "name": "Gmail Trigger",
-      "type": "n8n-nodes-base.gmailTrigger",
-      "typeVersion": 1.1,
-      "position": [240, 340],
-      "notes": "Polls Gmail inbox for new BOLDR-related emails"
+      "name": "Email Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        340
+      ],
+      "id": "fd5c1e64-c57d-4eac-8537-4c5dbbe10eb5",
+      "webhookId": "9fe444e0-68d3-4b16-b564-e7346389d6b1"
     },
     {
       "parameters": {
@@ -79,17 +80,20 @@
         },
         "options": {}
       },
-      "id": "set-normalize-email",
       "name": "Normalize Email Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [460, 340],
-      "notes": "Map Gmail fields to BOLDR intake schema"
+      "position": [
+        460,
+        340
+      ],
+      "notes": "Map Gmail fields to BOLDR intake schema",
+      "id": "92184b73-73f9-4b43-9fae-f225e1a3032e"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://boldr-app:8000/api/v1/intake",
+        "url": "http://192.168.1.85:8000/api/v1/intake",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -104,16 +108,33 @@
         "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  subject: $json.subject,\n  source_id: $json.email_id\n}) }}",
         "options": {}
       },
-      "id": "http-forward-email",
       "name": "Forward to Intelligence Loop",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [680, 340],
-      "notes": "POST normalized email to main BOLDR Intelligence Loop webhook"
+      "position": [
+        680,
+        340
+      ],
+      "notes": "POST normalized email to main BOLDR Intelligence Loop webhook",
+      "id": "be808205-f516-42ce-82f4-e77caca0d45e"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"received\",\"message\":\"Your email has been received. We'll respond shortly!\"}"
+      },
+      "name": "Respond to Email",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        860,
+        300
+      ],
+      "id": "c9bae790-c379-4efa-9884-ee8089f7f4b8"
     }
   ],
   "connections": {
-    "Gmail Trigger": {
+    "Email Webhook": {
       "main": [
         [
           {
@@ -134,26 +155,229 @@
           }
         ]
       ]
+    },
+    "Forward to Intelligence Loop": {
+      "main": [
+        [
+          {
+            "node": "Respond to Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1"
   },
-  "tags": [
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d0954080-542d-4b21-8e89-81137034b605",
+  "activeVersionId": "d0954080-542d-4b21-8e89-81137034b605",
+  "versionCounter": 7,
+  "triggerCount": 1,
+  "shared": [
     {
-      "name": "BOLDR"
-    },
-    {
-      "name": "intake"
-    },
-    {
-      "name": "email"
+      "updatedAt": "2026-05-17T00:47:42.451Z",
+      "createdAt": "2026-05-17T00:47:42.451Z",
+      "role": "workflow:owner",
+      "workflowId": "Qj8sWSe9Enz7EH5Q",
+      "projectId": "70ZbVsvKqCtEQm0z",
+      "project": {
+        "updatedAt": "2026-05-17T00:45:09.952Z",
+        "createdAt": "2026-05-17T00:44:53.395Z",
+        "id": "70ZbVsvKqCtEQm0z",
+        "name": "Steve Ng <steve@digitalfutures.sg>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
     }
   ],
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "boldr-n8n"
-  },
-  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
-  "description": "BOLDR Email Intake: Gmail trigger → normalize → forward to Intelligence Loop webhook"
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-17T05:49:15.998Z",
+    "createdAt": "2026-05-17T05:49:15.998Z",
+    "versionId": "d0954080-542d-4b21-8e89-81137034b605",
+    "workflowId": "Qj8sWSe9Enz7EH5Q",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "email",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "name": "Email Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          340
+        ],
+        "id": "fd5c1e64-c57d-4eac-8537-4c5dbbe10eb5",
+        "webhookId": "9fe444e0-68d3-4b16-b564-e7346389d6b1"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a1",
+                "name": "message",
+                "value": "={{ $json.text ?? $json.snippet ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a2",
+                "name": "channel",
+                "value": "email",
+                "type": "string"
+              },
+              {
+                "id": "a3",
+                "name": "sender_id",
+                "value": "={{ $json.from.email }}",
+                "type": "string"
+              },
+              {
+                "id": "a4",
+                "name": "sender_name",
+                "value": "={{ $json.from.name ?? $json.from.email }}",
+                "type": "string"
+              },
+              {
+                "id": "a5",
+                "name": "timestamp",
+                "value": "={{ $json.internalDate ?? $now.toISO() }}",
+                "type": "string"
+              },
+              {
+                "id": "a6",
+                "name": "thread_id",
+                "value": "={{ $json.threadId ?? $json.id }}",
+                "type": "string"
+              },
+              {
+                "id": "a7",
+                "name": "subject",
+                "value": "={{ $json.subject ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a8",
+                "name": "email_id",
+                "value": "={{ $json.id }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Normalize Email Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          460,
+          340
+        ],
+        "notes": "Map Gmail fields to BOLDR intake schema",
+        "id": "92184b73-73f9-4b43-9fae-f225e1a3032e"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/intake",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  subject: $json.subject,\n  source_id: $json.email_id\n}) }}",
+          "options": {}
+        },
+        "name": "Forward to Intelligence Loop",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          680,
+          340
+        ],
+        "notes": "POST normalized email to main BOLDR Intelligence Loop webhook",
+        "id": "be808205-f516-42ce-82f4-e77caca0d45e"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "{\"status\":\"received\",\"message\":\"Your email has been received. We'll respond shortly!\"}"
+        },
+        "name": "Respond to Email",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1,
+        "position": [
+          860,
+          300
+        ],
+        "id": "c9bae790-c379-4efa-9884-ee8089f7f4b8"
+      }
+    ],
+    "connections": {
+      "Email Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalize Email Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Email Data": {
+        "main": [
+          [
+            {
+              "node": "Forward to Intelligence Loop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Forward to Intelligence Loop": {
+        "main": [
+          [
+            {
+              "node": "Respond to Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Steve Ng",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-17T05:49:21.802Z",
+        "id": 50,
+        "workflowId": "Qj8sWSe9Enz7EH5Q",
+        "versionId": "d0954080-542d-4b21-8e89-81137034b605",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
+    ]
+  }
 }

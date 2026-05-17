@@ -1,25 +1,33 @@
-# BOLDR Email Intake Workflow
+# BOLDR Email Intake
 
-**Workflow ID:** `Qj8sWSe9Enz7EH5Q`
-**n8n URL:** http://192.168.1.85:5678/workflow/Qj8sWSe9Enz7EH5Q
-**Nodes:** 3
+## Overview
+Receives email messages via webhook, normalizes the data, forwards to the Intelligence Engine, and returns an immediate confirmation.
 
-## Step-by-Step Flow
+**Status:** ✅ Active  
+**Nodes:** 4  
+**Credentials:** No external credentials needed (all endpoints use FastAPI internal API)
 
-### Step 1: Gmail Trigger 🔌
-**Type:** Trigger
-**Description:** Watches for new emails in the connected Gmail account (requires OAuth)
+## Workflow Steps
 
-![Step 1](./email_intake_step01.png)
+| # | Node | Type | Description |
+|---|------|------|-------------|
+| 1 | Email Webhook | webhook | Receives email messages via webhook |
+| 2 | Normalize Email Data | set | Maps email payload to BOLDR intake schema |
+| 3 | Forward to Intelligence Loop | httpRequest | POST normalized data to BOLDR Intelligence Engine (FastAPI) |
+| 4 | Respond to Email | respondToWebhook | Returns immediate confirmation to email |
 
-### Step 2: Normalize Email Data 🔄
-**Type:** Transform
-**Description:** Extracts sender, subject, body from email and maps to BOLDR format
+## API Endpoints Used
 
-![Step 2](./email_intake_step02.png)
+- `POST /api/v1/intake`
 
-### Step 3: Forward to Intelligence Loop ➡️
-**Type:** Action
-**Description:** Sends normalized email data to FastAPI /api/v1/intake for classification
+## Testing
 
-![Step 3](./email_intake_step03.png)
+```bash
+# Test the webhook
+curl -X POST http://192.168.1.85:5678/webhook/email \
+  -H "Content-Type: application/json" \
+  -d '{"message": "How much does the BOLDR Venture cost?", "channel": "chat", "sender_id": "test"}'
+```
+
+---
+*Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*

@@ -1,5 +1,11 @@
 {
+  "updatedAt": "2026-05-17T05:14:10.276Z",
+  "createdAt": "2026-05-17T00:47:42.305Z",
+  "id": "shrn8Mr1CIIAitjI",
   "name": "BOLDR Chat Intake",
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "parameters": {
@@ -8,12 +14,16 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "webhook-chat",
       "name": "Chat Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [240, 340],
-      "notes": "Receives chat messages from BOLDR website/app widget"
+      "position": [
+        240,
+        340
+      ],
+      "notes": "Receives chat messages from BOLDR website/app widget",
+      "id": "b5aa5b09-715d-4ad6-911e-7cceb1dd7c0e",
+      "webhookId": "8ed188d2-74d5-49d4-ba85-b2f0bdd0396f"
     },
     {
       "parameters": {
@@ -65,17 +75,20 @@
         },
         "options": {}
       },
-      "id": "set-normalize-chat",
       "name": "Normalize Chat Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [460, 340],
-      "notes": "Map chat widget payload to BOLDR intake schema"
+      "position": [
+        460,
+        340
+      ],
+      "notes": "Map chat widget payload to BOLDR intake schema",
+      "id": "69ee28ec-4fcb-4879-bf57-e73649a36a74"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://boldr-app:8000/api/v1/intake",
+        "url": "http://192.168.1.85:8000/api/v1/intake",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -90,12 +103,15 @@
         "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.source_id\n}) }}",
         "options": {}
       },
-      "id": "http-forward-chat",
       "name": "Forward to Intelligence Loop",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [680, 340],
-      "notes": "POST normalized chat message to main BOLDR Intelligence Loop webhook"
+      "position": [
+        680,
+        340
+      ],
+      "notes": "POST normalized chat message to main BOLDR Intelligence Loop webhook",
+      "id": "052fa2ef-7d13-4bf7-816d-b8b2a35ddc83"
     },
     {
       "parameters": {
@@ -103,12 +119,15 @@
         "responseBody": "={\n  \"status\": \"received\",\n  \"message\": \"Your message has been received. We'll respond shortly!\"\n}",
         "options": {}
       },
-      "id": "webhook-response-chat",
       "name": "Respond to Chat Widget",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [900, 340],
-      "notes": "Return immediate confirmation to chat widget"
+      "position": [
+        900,
+        340
+      ],
+      "notes": "Return immediate confirmation to chat widget",
+      "id": "037c0890-3718-4622-aa7c-5439b1175f8c"
     }
   ],
   "connections": {
@@ -149,21 +168,250 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "tags": [
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+  "activeVersionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+  "versionCounter": 18,
+  "triggerCount": 1,
+  "shared": [
     {
-      "name": "BOLDR"
-    },
-    {
-      "name": "intake"
-    },
-    {
-      "name": "chat"
+      "updatedAt": "2026-05-17T00:47:42.309Z",
+      "createdAt": "2026-05-17T00:47:42.309Z",
+      "role": "workflow:owner",
+      "workflowId": "shrn8Mr1CIIAitjI",
+      "projectId": "70ZbVsvKqCtEQm0z",
+      "project": {
+        "updatedAt": "2026-05-17T00:45:09.952Z",
+        "createdAt": "2026-05-17T00:44:53.395Z",
+        "id": "70ZbVsvKqCtEQm0z",
+        "name": "Steve Ng <steve@digitalfutures.sg>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
     }
   ],
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "boldr-n8n"
-  },
-  "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP",
-  "description": "BOLDR Chat Intake: Website/app chat webhook → normalize → forward to Intelligence Loop → respond to widget"
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-17T05:14:10.280Z",
+    "createdAt": "2026-05-17T05:14:10.280Z",
+    "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+    "workflowId": "shrn8Mr1CIIAitjI",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "chat",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "name": "Chat Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          240,
+          340
+        ],
+        "notes": "Receives chat messages from BOLDR website/app widget",
+        "id": "b5aa5b09-715d-4ad6-911e-7cceb1dd7c0e",
+        "webhookId": "8ed188d2-74d5-49d4-ba85-b2f0bdd0396f"
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a1",
+                "name": "message",
+                "value": "={{ $json.body.message ?? $json.body.text ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a2",
+                "name": "channel",
+                "value": "={{ $json.body.channel ?? 'chat' }}",
+                "type": "string"
+              },
+              {
+                "id": "a3",
+                "name": "sender_id",
+                "value": "={{ $json.body.sender_id ?? $json.body.user_id ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a4",
+                "name": "sender_name",
+                "value": "={{ $json.body.sender_name ?? $json.body.user_name ?? 'anonymous' }}",
+                "type": "string"
+              },
+              {
+                "id": "a5",
+                "name": "timestamp",
+                "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
+                "type": "string"
+              },
+              {
+                "id": "a6",
+                "name": "thread_id",
+                "value": "={{ $json.body.thread_id ?? $json.body.session_id ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a7",
+                "name": "source_id",
+                "value": "={{ $json.body.message_id ?? '' }}",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "name": "Normalize Chat Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          460,
+          340
+        ],
+        "notes": "Map chat widget payload to BOLDR intake schema",
+        "id": "69ee28ec-4fcb-4879-bf57-e73649a36a74"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/intake",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.source_id\n}) }}",
+          "options": {}
+        },
+        "name": "Forward to Intelligence Loop",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          680,
+          340
+        ],
+        "notes": "POST normalized chat message to main BOLDR Intelligence Loop webhook",
+        "id": "052fa2ef-7d13-4bf7-816d-b8b2a35ddc83"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"status\": \"received\",\n  \"message\": \"Your message has been received. We'll respond shortly!\"\n}",
+          "options": {}
+        },
+        "name": "Respond to Chat Widget",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          900,
+          340
+        ],
+        "notes": "Return immediate confirmation to chat widget",
+        "id": "037c0890-3718-4622-aa7c-5439b1175f8c"
+      }
+    ],
+    "connections": {
+      "Chat Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalize Chat Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Chat Data": {
+        "main": [
+          [
+            {
+              "node": "Forward to Intelligence Loop",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Forward to Intelligence Loop": {
+        "main": [
+          [
+            {
+              "node": "Respond to Chat Widget",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Steve Ng",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-17T05:14:10.350Z",
+        "id": 33,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:14:11.104Z",
+        "id": 39,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:25:01.384Z",
+        "id": 45,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:14:10.332Z",
+        "id": 32,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:14:11.094Z",
+        "id": 38,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:25:01.368Z",
+        "id": 44,
+        "workflowId": "shrn8Mr1CIIAitjI",
+        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
+    ]
+  }
 }

@@ -1,0 +1,599 @@
+{
+  "updatedAt": "2026-05-17T05:59:17.446Z",
+  "createdAt": "2026-05-17T05:54:02.418Z",
+  "id": "yVSeNPXbrkKpc2U9",
+  "name": "BOLDR Intelligence Loop",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "boldr-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Multi-Channel Intake Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "id": "c2aef159-4204-4838-96b2-231fa2364f20",
+      "webhookId": "e84c34c5-18df-40e5-b538-11d1869e3ec0"
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "message",
+              "value": "={{ $json.body.message ?? $json.body.raw_message ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "channel",
+              "value": "={{ $json.body.channel ?? 'chat' }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "sender_id",
+              "value": "={{ $json.body.sender_id ?? 'anonymous' }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "sender_name",
+              "value": "={{ $json.body.sender_name ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "subject",
+              "value": "={{ $json.body.subject ?? '' }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "name": "Normalize Intake Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        300
+      ],
+      "id": "c93b86e3-3962-4e75-bc6e-1b0d20d1b2b6"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.85:8000/api/v1/intake",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"channel\": \"{{ $json.channel }}\",\n  \"sender_id\": \"{{ $json.sender_id }}\",\n  \"sender_name\": \"{{ $json.sender_name }}\",\n  \"subject\": \"{{ $json.subject }}\"\n}",
+        "options": {}
+      },
+      "name": "Process via Intelligence Engine",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        300
+      ],
+      "id": "1b6e579d-50ce-4792-ac51-e2fdd91aa7a4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.85:8000/api/v1/kb/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.question_type }} {{ $('Normalize Intake Data').item.json.message }}\",\n  \"persona\": \"{{ $json.buyer_persona }}\",\n  \"n_results\": 3\n}",
+        "options": {}
+      },
+      "name": "Search Knowledge Base",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        300
+      ],
+      "id": "27c4b519-78e5-4bd8-bd1a-32c43ca0e67c"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.85:8000/api/v1/reply/draft",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"kb_answer\": \"\",\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"confidence\": {{ $('Process via Intelligence Engine').item.json.confidence }}\n}",
+        "options": {}
+      },
+      "name": "Draft BOLDR Reply",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1080,
+        300
+      ],
+      "id": "716d73a5-4d00-4ca4-a72d-03adc8d21452"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.1.85:8000/api/v1/gap/log",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"theme\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"question\": \"{{ $('Normalize Intake Data').item.json.message }}\"\n}",
+        "options": {}
+      },
+      "name": "Log Knowledge Gap",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1300,
+        300
+      ],
+      "id": "17eae70e-66b4-4b1a-97c4-837c5554ea95"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $('Process via Intelligence Engine').item.json.is_answerable }},\n  \"message\": \"Your message has been processed. We'll get back to you shortly!\"\n}",
+        "options": {}
+      },
+      "name": "Send Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        300
+      ],
+      "id": "0e771df2-7e05-44eb-af88-33cad5bc46ef"
+    }
+  ],
+  "connections": {
+    "Multi-Channel Intake Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Intake Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Intake Data": {
+      "main": [
+        [
+          {
+            "node": "Process via Intelligence Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process via Intelligence Engine": {
+      "main": [
+        [
+          {
+            "node": "Search Knowledge Base",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Knowledge Base": {
+      "main": [
+        [
+          {
+            "node": "Draft BOLDR Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft BOLDR Reply": {
+      "main": [
+        [
+          {
+            "node": "Log Knowledge Gap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Knowledge Gap": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+  "activeVersionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+  "versionCounter": 51,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-05-17T05:54:02.421Z",
+      "createdAt": "2026-05-17T05:54:02.421Z",
+      "role": "workflow:owner",
+      "workflowId": "yVSeNPXbrkKpc2U9",
+      "projectId": "70ZbVsvKqCtEQm0z",
+      "project": {
+        "updatedAt": "2026-05-17T00:45:09.952Z",
+        "createdAt": "2026-05-17T00:44:53.395Z",
+        "id": "70ZbVsvKqCtEQm0z",
+        "name": "Steve Ng <steve@digitalfutures.sg>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-05-17T05:59:17.448Z",
+    "createdAt": "2026-05-17T05:59:17.448Z",
+    "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+    "workflowId": "yVSeNPXbrkKpc2U9",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "boldr-intake",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "name": "Multi-Channel Intake Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          200,
+          300
+        ],
+        "id": "c2aef159-4204-4838-96b2-231fa2364f20",
+        "webhookId": "e84c34c5-18df-40e5-b538-11d1869e3ec0"
+      },
+      {
+        "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "a1",
+                "name": "message",
+                "value": "={{ $json.body.message ?? $json.body.raw_message ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a2",
+                "name": "channel",
+                "value": "={{ $json.body.channel ?? 'chat' }}",
+                "type": "string"
+              },
+              {
+                "id": "a3",
+                "name": "sender_id",
+                "value": "={{ $json.body.sender_id ?? 'anonymous' }}",
+                "type": "string"
+              },
+              {
+                "id": "a4",
+                "name": "sender_name",
+                "value": "={{ $json.body.sender_name ?? '' }}",
+                "type": "string"
+              },
+              {
+                "id": "a5",
+                "name": "subject",
+                "value": "={{ $json.body.subject ?? '' }}",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "name": "Normalize Intake Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          420,
+          300
+        ],
+        "id": "c93b86e3-3962-4e75-bc6e-1b0d20d1b2b6"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/intake",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"channel\": \"{{ $json.channel }}\",\n  \"sender_id\": \"{{ $json.sender_id }}\",\n  \"sender_name\": \"{{ $json.sender_name }}\",\n  \"subject\": \"{{ $json.subject }}\"\n}",
+          "options": {}
+        },
+        "name": "Process via Intelligence Engine",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          640,
+          300
+        ],
+        "id": "1b6e579d-50ce-4792-ac51-e2fdd91aa7a4"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/kb/search",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"query\": \"{{ $json.question_type }} {{ $('Normalize Intake Data').item.json.message }}\",\n  \"persona\": \"{{ $json.buyer_persona }}\",\n  \"n_results\": 3\n}",
+          "options": {}
+        },
+        "name": "Search Knowledge Base",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          860,
+          300
+        ],
+        "id": "27c4b519-78e5-4bd8-bd1a-32c43ca0e67c"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/reply/draft",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"kb_answer\": \"\",\n  \"channel\": \"{{ $('Normalize Intake Data').item.json.channel }}\",\n  \"confidence\": {{ $('Process via Intelligence Engine').item.json.confidence }}\n}",
+          "options": {}
+        },
+        "name": "Draft BOLDR Reply",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1080,
+          300
+        ],
+        "id": "716d73a5-4d00-4ca4-a72d-03adc8d21452"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://192.168.1.85:8000/api/v1/gap/log",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"theme\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"question\": \"{{ $('Normalize Intake Data').item.json.message }}\"\n}",
+          "options": {}
+        },
+        "name": "Log Knowledge Gap",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1300,
+          300
+        ],
+        "id": "17eae70e-66b4-4b1a-97c4-837c5554ea95"
+      },
+      {
+        "parameters": {
+          "respondWith": "json",
+          "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $('Process via Intelligence Engine').item.json.is_answerable }},\n  \"message\": \"Your message has been processed. We'll get back to you shortly!\"\n}",
+          "options": {}
+        },
+        "name": "Send Response",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1520,
+          300
+        ],
+        "id": "0e771df2-7e05-44eb-af88-33cad5bc46ef"
+      }
+    ],
+    "connections": {
+      "Multi-Channel Intake Webhook": {
+        "main": [
+          [
+            {
+              "node": "Normalize Intake Data",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize Intake Data": {
+        "main": [
+          [
+            {
+              "node": "Process via Intelligence Engine",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Process via Intelligence Engine": {
+        "main": [
+          [
+            {
+              "node": "Search Knowledge Base",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Search Knowledge Base": {
+        "main": [
+          [
+            {
+              "node": "Draft BOLDR Reply",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Draft BOLDR Reply": {
+        "main": [
+          [
+            {
+              "node": "Log Knowledge Gap",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Log Knowledge Gap": {
+        "main": [
+          [
+            {
+              "node": "Send Response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Steve Ng",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-05-17T05:59:17.534Z",
+        "id": 87,
+        "workflowId": "yVSeNPXbrkKpc2U9",
+        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:59:17.607Z",
+        "id": 89,
+        "workflowId": "yVSeNPXbrkKpc2U9",
+        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:59:17.512Z",
+        "id": 86,
+        "workflowId": "yVSeNPXbrkKpc2U9",
+        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T05:59:17.592Z",
+        "id": 88,
+        "workflowId": "yVSeNPXbrkKpc2U9",
+        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      }
+    ]
+  }
+}

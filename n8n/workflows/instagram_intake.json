@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-05-17T05:14:10.696Z",
-  "createdAt": "2026-05-17T00:47:42.520Z",
-  "id": "9Z1ZC5CMijLlTRiJ",
-  "name": "BOLDR WhatsApp Intake",
+  "updatedAt": "2026-05-17T05:14:10.575Z",
+  "createdAt": "2026-05-17T00:47:42.488Z",
+  "id": "LBAM9AM2t14lWrLv",
+  "name": "BOLDR Instagram DM Intake",
   "description": null,
   "active": true,
   "isArchived": false,
@@ -10,20 +10,20 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "whatsapp",
+        "path": "instagram-dm",
         "responseMode": "responseNode",
         "options": {}
       },
-      "name": "WhatsApp Webhook",
+      "name": "Instagram DM Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
         240,
         340
       ],
-      "notes": "Receives WhatsApp Business API messages via webhook",
-      "id": "3fe484ee-9fb5-4a43-8d21-a65bff21ef1f",
-      "webhookId": "fac90376-32c4-4782-bc75-3c3e09102fa8"
+      "notes": "Receives Instagram DM events via Meta webhook subscription",
+      "id": "936e74d1-5f04-4fc7-b527-65099dd36c7d",
+      "webhookId": "c083b7c2-730c-4347-aa29-242e4587dff7"
     },
     {
       "parameters": {
@@ -32,7 +32,7 @@
             {
               "id": "a1",
               "name": "channel",
-              "value": "={{ $json.channel ?? 'whatsapp' }}",
+              "value": "={{ $json.channel ?? 'instagram' }}",
               "type": "string"
             },
             {
@@ -50,22 +50,22 @@
             {
               "id": "a4",
               "name": "platform",
-              "value": "={{ $json.metadata.platform ?? 'whatsapp' }}",
+              "value": "={{ $json.metadata.platform ?? 'instagram' }}",
               "type": "string"
             }
           ]
         },
         "options": {}
       },
-      "name": "Normalize WhatsApp Data",
+      "name": "Normalize Instagram Data",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
         680,
         300
       ],
-      "notes": "Map WhatsApp Business API payload to BOLDR intake schema",
-      "id": "bee1780e-2e9f-4648-b785-822002968ccf"
+      "notes": "Map Instagram webhook payload to BOLDR intake schema",
+      "id": "c53e6de5-60d2-4b28-b351-8e9fc910293b"
     },
     {
       "parameters": {
@@ -82,7 +82,7 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.wa_message_id\n}) }}",
+        "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.ig_message_id\n}) }}",
         "options": {}
       },
       "name": "Forward to Intelligence Loop",
@@ -92,37 +92,37 @@
         900,
         300
       ],
-      "notes": "POST normalized WhatsApp message to main BOLDR Intelligence Loop webhook",
-      "id": "45a6757a-82a5-4482-ac81-4712cdfaf7a6"
+      "notes": "POST normalized Instagram DM to main BOLDR Intelligence Loop webhook",
+      "id": "4be78c1b-37f7-4cee-8e7c-5a9973cff31c"
     },
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{\"status\":\"received\",\"message\":\"Your WhatsApp message has been received. We'll respond shortly!\"}"
+        "responseBody": "{\"status\":\"received\",\"message\":\"Your Instagram message has been received. We'll respond shortly!\"}"
       },
-      "name": "Respond to WhatsApp",
+      "name": "Respond to Instagram",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
         860,
         300
       ],
-      "id": "60c9ced8-29c5-4c1f-8a58-2246390f58d1"
+      "id": "5f5144f0-ec76-4f29-8a55-ead215274e37"
     }
   ],
   "connections": {
-    "WhatsApp Webhook": {
+    "Instagram DM Webhook": {
       "main": [
         [
           {
-            "node": "Normalize WhatsApp Data",
+            "node": "Normalize Instagram Data",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Normalize WhatsApp Data": {
+    "Normalize Instagram Data": {
       "main": [
         [
           {
@@ -137,7 +137,7 @@
       "main": [
         [
           {
-            "node": "Respond to WhatsApp",
+            "node": "Respond to Instagram",
             "type": "main",
             "index": 0
           }
@@ -151,16 +151,16 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-  "activeVersionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+  "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+  "activeVersionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
   "versionCounter": 28,
   "triggerCount": 1,
   "shared": [
     {
-      "updatedAt": "2026-05-17T00:47:42.521Z",
-      "createdAt": "2026-05-17T00:47:42.521Z",
+      "updatedAt": "2026-05-17T00:47:42.490Z",
+      "createdAt": "2026-05-17T00:47:42.490Z",
       "role": "workflow:owner",
-      "workflowId": "9Z1ZC5CMijLlTRiJ",
+      "workflowId": "LBAM9AM2t14lWrLv",
       "projectId": "70ZbVsvKqCtEQm0z",
       "project": {
         "updatedAt": "2026-05-17T00:45:09.952Z",
@@ -176,28 +176,28 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:14:10.697Z",
-    "createdAt": "2026-05-17T05:14:10.697Z",
-    "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-    "workflowId": "9Z1ZC5CMijLlTRiJ",
+    "updatedAt": "2026-05-17T05:14:10.576Z",
+    "createdAt": "2026-05-17T05:14:10.576Z",
+    "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+    "workflowId": "LBAM9AM2t14lWrLv",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
-          "path": "whatsapp",
+          "path": "instagram-dm",
           "responseMode": "responseNode",
           "options": {}
         },
-        "name": "WhatsApp Webhook",
+        "name": "Instagram DM Webhook",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2,
         "position": [
           240,
           340
         ],
-        "notes": "Receives WhatsApp Business API messages via webhook",
-        "id": "3fe484ee-9fb5-4a43-8d21-a65bff21ef1f",
-        "webhookId": "fac90376-32c4-4782-bc75-3c3e09102fa8"
+        "notes": "Receives Instagram DM events via Meta webhook subscription",
+        "id": "936e74d1-5f04-4fc7-b527-65099dd36c7d",
+        "webhookId": "c083b7c2-730c-4347-aa29-242e4587dff7"
       },
       {
         "parameters": {
@@ -206,7 +206,7 @@
               {
                 "id": "a1",
                 "name": "channel",
-                "value": "={{ $json.channel ?? 'whatsapp' }}",
+                "value": "={{ $json.channel ?? 'instagram' }}",
                 "type": "string"
               },
               {
@@ -224,22 +224,22 @@
               {
                 "id": "a4",
                 "name": "platform",
-                "value": "={{ $json.metadata.platform ?? 'whatsapp' }}",
+                "value": "={{ $json.metadata.platform ?? 'instagram' }}",
                 "type": "string"
               }
             ]
           },
           "options": {}
         },
-        "name": "Normalize WhatsApp Data",
+        "name": "Normalize Instagram Data",
         "type": "n8n-nodes-base.set",
         "typeVersion": 3.4,
         "position": [
           680,
           300
         ],
-        "notes": "Map WhatsApp Business API payload to BOLDR intake schema",
-        "id": "bee1780e-2e9f-4648-b785-822002968ccf"
+        "notes": "Map Instagram webhook payload to BOLDR intake schema",
+        "id": "c53e6de5-60d2-4b28-b351-8e9fc910293b"
       },
       {
         "parameters": {
@@ -256,7 +256,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.wa_message_id\n}) }}",
+          "jsonBody": "={{ JSON.stringify({\n  message: $json.message,\n  channel: $json.channel,\n  sender_id: $json.sender_id,\n  sender_name: $json.sender_name,\n  timestamp: $json.timestamp,\n  thread_id: $json.thread_id,\n  source_id: $json.ig_message_id\n}) }}",
           "options": {}
         },
         "name": "Forward to Intelligence Loop",
@@ -266,37 +266,37 @@
           900,
           300
         ],
-        "notes": "POST normalized WhatsApp message to main BOLDR Intelligence Loop webhook",
-        "id": "45a6757a-82a5-4482-ac81-4712cdfaf7a6"
+        "notes": "POST normalized Instagram DM to main BOLDR Intelligence Loop webhook",
+        "id": "4be78c1b-37f7-4cee-8e7c-5a9973cff31c"
       },
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "{\"status\":\"received\",\"message\":\"Your WhatsApp message has been received. We'll respond shortly!\"}"
+          "responseBody": "{\"status\":\"received\",\"message\":\"Your Instagram message has been received. We'll respond shortly!\"}"
         },
-        "name": "Respond to WhatsApp",
+        "name": "Respond to Instagram",
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1,
         "position": [
           860,
           300
         ],
-        "id": "60c9ced8-29c5-4c1f-8a58-2246390f58d1"
+        "id": "5f5144f0-ec76-4f29-8a55-ead215274e37"
       }
     ],
     "connections": {
-      "WhatsApp Webhook": {
+      "Instagram DM Webhook": {
         "main": [
           [
             {
-              "node": "Normalize WhatsApp Data",
+              "node": "Normalize Instagram Data",
               "type": "main",
               "index": 0
             }
           ]
         ]
       },
-      "Normalize WhatsApp Data": {
+      "Normalize Instagram Data": {
         "main": [
           [
             {
@@ -311,7 +311,7 @@
         "main": [
           [
             {
-              "node": "Respond to WhatsApp",
+              "node": "Respond to Instagram",
               "type": "main",
               "index": 0
             }
@@ -325,50 +325,50 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:14:10.736Z",
-        "id": 37,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:14:10.645Z",
+        "id": 35,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.163Z",
-        "id": 41,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:14:11.214Z",
+        "id": 43,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:25:01.439Z",
-        "id": 47,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:25:01.488Z",
+        "id": 49,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:10.722Z",
-        "id": 36,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:14:10.632Z",
+        "id": 34,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.153Z",
-        "id": 40,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:14:11.204Z",
+        "id": 42,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:25:01.425Z",
-        "id": 46,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "createdAt": "2026-05-17T05:25:01.477Z",
+        "id": 48,
+        "workflowId": "LBAM9AM2t14lWrLv",
+        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }

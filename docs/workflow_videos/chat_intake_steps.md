@@ -1,31 +1,33 @@
-# BOLDR Chat Intake Workflow
+# BOLDR Chat Intake
 
-**Workflow ID:** `shrn8Mr1CIIAitjI`
-**n8n URL:** http://192.168.1.85:5678/workflow/shrn8Mr1CIIAitjI
-**Nodes:** 4
+## Overview
+Receives chat messages from the BOLDR website/app widget, normalizes the data, forwards to the Intelligence Engine, and returns an immediate confirmation.
 
-## Step-by-Step Flow
+**Status:** ✅ Active  
+**Nodes:** 4  
+**Credentials:** No external credentials needed (all endpoints use FastAPI internal API)
 
-### Step 1: Chat Webhook 🔌
-**Type:** Trigger
-**Description:** Receives incoming chat messages via POST /webhook/chat
+## Workflow Steps
 
-![Step 1](./chat_intake_step01.png)
+| # | Node | Type | Description |
+|---|------|------|-------------|
+| 1 | Chat Webhook | webhook | Receives chat messages from BOLDR website/app widget |
+| 2 | Normalize Chat Data | set | Maps chat widget payload to BOLDR intake schema |
+| 3 | Forward to Intelligence Loop | httpRequest | POST normalized data to BOLDR Intelligence Engine (FastAPI) |
+| 4 | Respond to Chat Widget | respondToWebhook | Returns immediate confirmation to the chat widget |
 
-### Step 2: Normalize Chat Data 🔄
-**Type:** Transform
-**Description:** Extracts channel, customer_id, message, metadata from payload
+## API Endpoints Used
 
-![Step 2](./chat_intake_step02.png)
+- `POST /api/v1/intake`
 
-### Step 3: Forward to Intelligence Loop ➡️
-**Type:** Action
-**Description:** Sends normalized data to FastAPI /api/v1/intake for classification
+## Testing
 
-![Step 3](./chat_intake_step03.png)
+```bash
+# Test the webhook
+curl -X POST http://192.168.1.85:5678/webhook/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "How much does the BOLDR Venture cost?", "channel": "chat", "sender_id": "test"}'
+```
 
-### Step 4: Respond to Chat Widget ✉️
-**Type:** Response
-**Description:** Returns acknowledgment to the customer: 'Your message has been received'
-
-![Step 4](./chat_intake_step04.png)
+---
+*Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
