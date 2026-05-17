@@ -15,6 +15,13 @@ services:
       - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Asia/Singapore}
       - N8N_PAYLOAD_SIZE_MAX=16
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=steve@digitalfutures.sg
+      - N8N_BASIC_AUTH_PASSWORD=BolDR2026!demo
+      - N8N_OWNER_EMAIL=steve@digitalfutures.sg
+      - N8N_OWNER_PASSWORD=BolDR2026!demo
+      - N8N_API_KEY=BOLDR_n8n_API_KEY_2026
+      - WEBHOOK_URL=http://localhost:5678/
     depends_on:
       - chromadb
     restart: unless-stopped

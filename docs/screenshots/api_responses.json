@@ -1,0 +1,1025 @@
+{
+  "health": {
+    "status": "healthy",
+    "service": "BOLDR Intelligence Engine",
+    "version": "1.0.0",
+    "author": "Steve Ng, Founder and CEO - Digital Futures Consultancy LLP"
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "BOLDR Self-Improving Customer Intelligence Engine",
+      "description": "API for the BOLDR customer intelligence engine \u2014 ECHELON 2026 AI Workflow Competition",
+      "version": "1.0.0"
+    },
+    "paths": {
+      "/api/v1/health": {
+        "get": {
+          "summary": "Health Check",
+          "description": "Health check endpoint.",
+          "operationId": "health_check_api_v1_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/intake": {
+        "post": {
+          "summary": "Process Intake",
+          "description": "Process an incoming message through the full intelligence loop.\n\nThis is the main endpoint called by n8n workflows.",
+          "operationId": "process_intake_api_v1_intake_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeMessage"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntentResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/intent": {
+        "post": {
+          "summary": "Classify Intent",
+          "description": "Classify intent and persona for a message (standalone endpoint).",
+          "operationId": "classify_intent_api_v1_intent_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntentRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/IntentResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/kb/search": {
+        "post": {
+          "summary": "Search Kb",
+          "description": "Search the knowledge base.",
+          "operationId": "search_kb_api_v1_kb_search_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KBSearchRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/reply/draft": {
+        "post": {
+          "summary": "Draft Reply",
+          "description": "Draft a reply in BOLDR brand voice.",
+          "operationId": "draft_reply_api_v1_reply_draft_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplyRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/gap/log": {
+        "post": {
+          "summary": "Log Gap",
+          "description": "Log a knowledge gap ticket.",
+          "operationId": "log_gap_api_v1_gap_log_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GapLogRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/themes/weekly": {
+        "get": {
+          "summary": "Get Weekly Themes",
+          "description": "Get the weekly theme clustering report.",
+          "operationId": "get_weekly_themes_api_v1_themes_weekly_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/themes/monthly-brief": {
+        "get": {
+          "summary": "Get Monthly Brief",
+          "description": "Get the monthly marketing intelligence brief.",
+          "operationId": "get_monthly_brief_api_v1_themes_monthly_brief_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/kb/auto-draft": {
+        "post": {
+          "summary": "Auto Draft Kb",
+          "description": "Auto-draft a KB entry from a resolved gap.",
+          "operationId": "auto_draft_kb_api_v1_kb_auto_draft_post",
+          "parameters": [
+            {
+              "name": "question",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Question"
+              }
+            },
+            {
+              "name": "answer",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Answer"
+              }
+            },
+            {
+              "name": "theme",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Theme"
+              }
+            },
+            {
+              "name": "persona",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Persona"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/sop/routing/{question_type}": {
+        "get": {
+          "summary": "Get Sop Routing",
+          "description": "Get SOP routing for a question type.",
+          "operationId": "get_sop_routing_api_v1_sop_routing__question_type__get",
+          "parameters": [
+            {
+              "name": "question_type",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Question Type"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/sop/tone": {
+        "get": {
+          "summary": "Get Tone Guidelines",
+          "description": "Get BOLDR brand voice tone guidelines.",
+          "operationId": "get_tone_guidelines_api_v1_sop_tone_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "GapLogRequest": {
+          "properties": {
+            "ticket_id": {
+              "type": "string",
+              "title": "Ticket Id"
+            },
+            "theme": {
+              "type": "string",
+              "title": "Theme"
+            },
+            "persona": {
+              "type": "string",
+              "title": "Persona"
+            },
+            "question": {
+              "type": "string",
+              "title": "Question"
+            }
+          },
+          "type": "object",
+          "required": [
+            "ticket_id",
+            "theme",
+            "persona",
+            "question"
+          ],
+          "title": "GapLogRequest",
+          "description": "Request to log a knowledge gap."
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "IntakeMessage": {
+          "properties": {
+            "message": {
+              "type": "string",
+              "title": "Message",
+              "description": "Customer message text"
+            },
+            "subject": {
+              "type": "string",
+              "title": "Subject",
+              "description": "Subject line (email only)",
+              "default": ""
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel",
+              "description": "Channel: email, instagram_dm, whatsapp, chat"
+            },
+            "sender_id": {
+              "type": "string",
+              "title": "Sender Id",
+              "description": "Sender identifier",
+              "default": ""
+            },
+            "sender_name": {
+              "type": "string",
+              "title": "Sender Name",
+              "description": "Sender display name",
+              "default": "there"
+            },
+            "timestamp": {
+              "type": "string",
+              "title": "Timestamp",
+              "description": "ISO 8601 timestamp",
+              "default": ""
+            },
+            "thread_id": {
+              "type": "string",
+              "title": "Thread Id",
+              "description": "Conversation thread ID",
+              "default": ""
+            },
+            "source_id": {
+              "type": "string",
+              "title": "Source Id",
+              "description": "Original message ID from channel",
+              "default": ""
+            }
+          },
+          "type": "object",
+          "required": [
+            "message",
+            "channel"
+          ],
+          "title": "IntakeMessage",
+          "description": "Normalised intake message from any channel."
+        },
+        "IntentRequest": {
+          "properties": {
+            "message": {
+              "type": "string",
+              "title": "Message",
+              "description": "Customer message"
+            },
+            "subject": {
+              "type": "string",
+              "title": "Subject",
+              "description": "Email subject line",
+              "default": ""
+            }
+          },
+          "type": "object",
+          "required": [
+            "message"
+          ],
+          "title": "IntentRequest",
+          "description": "Request for intent classification."
+        },
+        "IntentResponse": {
+          "properties": {
+            "ticket_id": {
+              "type": "string",
+              "title": "Ticket Id"
+            },
+            "question_type": {
+              "type": "string",
+              "title": "Question Type"
+            },
+            "buyer_persona": {
+              "type": "string",
+              "title": "Buyer Persona"
+            },
+            "confidence": {
+              "type": "number",
+              "title": "Confidence"
+            },
+            "is_answerable": {
+              "type": "boolean",
+              "title": "Is Answerable"
+            },
+            "answerability_type": {
+              "type": "string",
+              "title": "Answerability Type"
+            },
+            "escalation_required": {
+              "type": "boolean",
+              "title": "Escalation Required"
+            },
+            "escalation_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Escalation Reason"
+            },
+            "sop_routing": {
+              "type": "string",
+              "title": "Sop Routing"
+            },
+            "needs_shopify": {
+              "type": "boolean",
+              "title": "Needs Shopify"
+            }
+          },
+          "type": "object",
+          "required": [
+            "ticket_id",
+            "question_type",
+            "buyer_persona",
+            "confidence",
+            "is_answerable",
+            "answerability_type",
+            "escalation_required",
+            "sop_routing",
+            "needs_shopify"
+          ],
+          "title": "IntentResponse",
+          "description": "Response from intent classification."
+        },
+        "KBSearchRequest": {
+          "properties": {
+            "query": {
+              "type": "string",
+              "title": "Query",
+              "description": "Search query"
+            },
+            "n_results": {
+              "type": "integer",
+              "title": "N Results",
+              "description": "Number of results to return",
+              "default": 5
+            }
+          },
+          "type": "object",
+          "required": [
+            "query"
+          ],
+          "title": "KBSearchRequest",
+          "description": "Request for KB search."
+        },
+        "ReplyRequest": {
+          "properties": {
+            "ticket_id": {
+              "type": "string",
+              "title": "Ticket Id"
+            },
+            "customer_name": {
+              "type": "string",
+              "title": "Customer Name",
+              "default": "there"
+            },
+            "subject": {
+              "type": "string",
+              "title": "Subject",
+              "default": ""
+            },
+            "question_type": {
+              "type": "string",
+              "title": "Question Type"
+            },
+            "persona": {
+              "type": "string",
+              "title": "Persona"
+            },
+            "kb_answer": {
+              "type": "string",
+              "title": "Kb Answer"
+            },
+            "sop_routing": {
+              "type": "string",
+              "title": "Sop Routing",
+              "default": ""
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel",
+              "default": "email"
+            },
+            "confidence": {
+              "type": "number",
+              "title": "Confidence",
+              "default": 1.0
+            }
+          },
+          "type": "object",
+          "required": [
+            "ticket_id",
+            "question_type",
+            "persona",
+            "kb_answer"
+          ],
+          "title": "ReplyRequest",
+          "description": "Request for reply drafting."
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            },
+            "input": {
+              "title": "Input"
+            },
+            "ctx": {
+              "type": "object",
+              "title": "Context"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      }
+    }
+  },
+  "intake": {
+    "ticket_id": "TKT-94119",
+    "question_type": "servicing",
+    "buyer_persona": "owner_aftercare",
+    "confidence": 0.98,
+    "is_answerable": false,
+    "answerability_type": "no",
+    "escalation_required": false,
+    "escalation_reason": null,
+    "sop_routing": "Servicing Rate Card",
+    "needs_shopify": false
+  },
+  "kb_search": {
+    "results": [
+      {
+        "id": "strap_str_ti_20",
+        "content": "BOLDR Strap \u2014 Titanium Bracelet (Titanium)\nSKU: STR-TI-20\nPrice: SGD 145\nBPA-free: YES\nCompatible with: Expedition only",
+        "metadata": {
+          "section": "strap_catalogue",
+          "colour": "Titanium",
+          "bpa_free": "YES",
+          "price": "SGD 145",
+          "sku": "STR-TI-20",
+          "type": "Titanium Bracelet",
+          "category": "strap_catalogue",
+          "compatible_with": "Expedition only",
+          "source_file": "product_reference"
+        },
+        "distance": 0.4709493,
+        "confidence": 0.5290507
+      },
+      {
+        "id": "faq_strap_compatibility_13",
+        "content": "FAQ (Strap Compatibility)\nQ: What lug width do Boldr watches use?\nA: All current Boldr models (Expedition and",
+        "metadata": {
+          "source_file": "faq_document",
+          "question": "What lug width do Boldr watches use?",
+          "section": "faq_strap_compatibility",
+          "category": "faq",
+          "answer": "All current Boldr models (Expedition and"
+        },
+        "distance": 0.55791354,
+        "confidence": 0.44208645999999996
+      },
+      {
+        "id": "faq_general_31",
+        "content": "FAQ (General)\nQ: What is the difference between the Expedition and Journey?\nA: The Expedition",
+        "metadata": {
+          "section": "faq_general",
+          "answer": "The Expedition",
+          "source_file": "faq_document",
+          "question": "What is the difference between the Expedition and Journey?",
+          "category": "faq"
+        },
+        "distance": 0.5813104,
+        "confidence": 0.4186896
+      },
+      {
+        "id": "faq_strap_compatibility_15",
+        "content": "FAQ (Strap Compatibility)\nQ: Can I use a NATO strap on the Expedition?\nA: Yes. Any standard 20mm NATO strap",
+        "metadata": {
+          "answer": "Yes. Any standard 20mm NATO strap",
+          "question": "Can I use a NATO strap on the Expedition?",
+          "source_file": "faq_document",
+          "category": "faq",
+          "section": "faq_strap_compatibility"
+        },
+        "distance": 0.6044382,
+        "confidence": 0.39556179999999996
+      },
+      {
+        "id": "faq_strap_compatibility_16",
+        "content": "FAQ (Strap Compatibility)\nQ: Can I swap straps between the Expedition and Journey?\nA: Yes. Both models share",
+        "metadata": {
+          "source_file": "faq_document",
+          "category": "faq",
+          "answer": "Yes. Both models share",
+          "question": "Can I swap straps between the Expedition and Journey?",
+          "section": "faq_strap_compatibility"
+        },
+        "distance": 0.6087862,
+        "confidence": 0.39121379999999994
+      }
+    ],
+    "best_match": {
+      "id": "strap_str_ti_20",
+      "content": "BOLDR Strap \u2014 Titanium Bracelet (Titanium)\nSKU: STR-TI-20\nPrice: SGD 145\nBPA-free: YES\nCompatible with: Expedition only",
+      "metadata": {
+        "section": "strap_catalogue",
+        "colour": "Titanium",
+        "bpa_free": "YES",
+        "price": "SGD 145",
+        "sku": "STR-TI-20",
+        "type": "Titanium Bracelet",
+        "category": "strap_catalogue",
+        "compatible_with": "Expedition only",
+        "source_file": "product_reference"
+      },
+      "distance": 0.4709493,
+      "confidence": 0.5290507
+    },
+    "confidence": 0.5290507,
+    "is_answerable": true
+  },
+  "reply_draft": {
+    "ticket_id": "TKT-94119",
+    "draft_reply": "Hi there! Happy to help.\n\nBOLDR Strap \u2014 Titanium Bracelet (Titanium)\nSKU: STR-TI-20\nPrice: SGD 145\nBPA-free: YES\nCompatible with: Expedition only\n\n\u2014 BOLDR CS Team",
+    "confidence": 1.0,
+    "needs_approval": false,
+    "channel": "chat",
+    "source": "kb",
+    "sop_routing": ""
+  },
+  "sop_routing": {
+    "source": "Servicing Rate Card",
+    "action": "Check tier pricing, turnaround. Battery SGD 35 (3-5 days), Regulation SGD 85 (7-10 days), Full Service SGD 160-220",
+    "kb_sources": [
+      "rate_card_servicing",
+      "faq_document"
+    ]
+  },
+  "n8n_workflows": [
+    {
+      "id": "9Z1ZC5CMijLlTRiJ",
+      "name": "BOLDR WhatsApp Intake",
+      "active": true,
+      "node_count": 4,
+      "nodes": [
+        {
+          "name": "WhatsApp Webhook",
+          "type": "n8n-nodes-base.webhook"
+        },
+        {
+          "name": "Normalize WhatsApp Data",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "Forward to Intelligence Loop",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Respond to WhatsApp",
+          "type": "n8n-nodes-base.respondToWebhook"
+        }
+      ]
+    },
+    {
+      "id": "GDH4I878uz44yXDC",
+      "name": "BOLDR Intelligence Loop",
+      "active": false,
+      "node_count": 27,
+      "nodes": [
+        {
+          "name": "Multi-Channel Intake Webhook",
+          "type": "n8n-nodes-base.webhook"
+        },
+        {
+          "name": "Normalize Intake Data",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "Extract Intent + Persona",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Capture Intent Output",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "KB Search (ChromaDB)",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Route by Result Type",
+          "type": "n8n-nodes-base.switch"
+        },
+        {
+          "name": "Draft BOLDR Reply",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Queue for Human Approval",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Flag Knowledge Gap",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log Gap to Sheets",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Shopify Product Lookup",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Shopify Answerable?",
+          "type": "n8n-nodes-base.if"
+        },
+        {
+          "name": "Draft Shopify Reply",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Queue Shopify Reply for Approval",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Flag Shopify Gap",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log Shopify Gap to Sheets",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Generate Human Handoff Reply",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log Human Escalation",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Auto-Draft KB Entry",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log KB Draft to Sheets",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Weekly Theme Clustering Trigger",
+          "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+          "name": "Run Theme Clustering",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log Weekly Themes",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Monthly Marketing Brief Trigger",
+          "type": "n8n-nodes-base.scheduleTrigger"
+        },
+        {
+          "name": "Generate Marketing Brief",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Log Marketing Brief",
+          "type": "n8n-nodes-base.googleSheets"
+        },
+        {
+          "name": "Send Webhook Response",
+          "type": "n8n-nodes-base.respondToWebhook"
+        }
+      ]
+    },
+    {
+      "id": "LBAM9AM2t14lWrLv",
+      "name": "BOLDR Instagram DM Intake",
+      "active": true,
+      "node_count": 4,
+      "nodes": [
+        {
+          "name": "Instagram DM Webhook",
+          "type": "n8n-nodes-base.webhook"
+        },
+        {
+          "name": "Normalize Instagram Data",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "Forward to Intelligence Loop",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Respond to Instagram",
+          "type": "n8n-nodes-base.respondToWebhook"
+        }
+      ]
+    },
+    {
+      "id": "Qj8sWSe9Enz7EH5Q",
+      "name": "BOLDR Email Intake",
+      "active": false,
+      "node_count": 3,
+      "nodes": [
+        {
+          "name": "Gmail Trigger",
+          "type": "n8n-nodes-base.gmailTrigger"
+        },
+        {
+          "name": "Normalize Email Data",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "Forward to Intelligence Loop",
+          "type": "n8n-nodes-base.httpRequest"
+        }
+      ]
+    },
+    {
+      "id": "shrn8Mr1CIIAitjI",
+      "name": "BOLDR Chat Intake",
+      "active": true,
+      "node_count": 4,
+      "nodes": [
+        {
+          "name": "Chat Webhook",
+          "type": "n8n-nodes-base.webhook"
+        },
+        {
+          "name": "Normalize Chat Data",
+          "type": "n8n-nodes-base.set"
+        },
+        {
+          "name": "Forward to Intelligence Loop",
+          "type": "n8n-nodes-base.httpRequest"
+        },
+        {
+          "name": "Respond to Chat Widget",
+          "type": "n8n-nodes-base.respondToWebhook"
+        }
+      ]
+    }
+  ],
+  "n8n_webhook_chat": {
+    "status": "received",
+    "message": "Your message has been received. We'll respond shortly!"
+  },
+  "n8n_webhook_whatsapp": {
+    "status": "received",
+    "message": "Your WhatsApp message has been received. We'll respond shortly!"
+  },
+  "n8n_webhook_instagram": {
+    "status": "received",
+    "message": "Your Instagram message has been received. We'll respond shortly!"
+  }
+}
