@@ -100,6 +100,17 @@ BOLDR is a Singapore-based watch micro-brand with a 3-person customer service te
 
 **This is not a chatbot.** This is a closed-loop intelligence system that gets smarter with every ticket.
 
+### Competition Demo vs. Production
+
+**For the ECHELON 2026 competition**, BOLDR uses **internal FastAPI webhooks** for all channel intake. The 5 n8n workflows send ticket data directly to `/api/v1/intake` — no external platform credentials, no OAuth, no API keys required. This means the system works end-to-end out of the box: `docker compose up -d`, seed the KB, import workflows, and process tickets immediately.
+
+**For production deployment**, BOLDR has production-ready webhook receivers for WhatsApp Business API, Instagram Graph API, and Email (Gmail IMAP or Mailgun/SendGrid webhook). Each channel has Meta-style verification endpoints, payload normalisation, and full integration testing. Setting up real credentials is optional and documented step-by-step in **[BOLDR-Channel-Integrations.md](docs/BOLDR-Channel-Integrations.md)**.
+
+| Mode | How It Works | Credentials Needed | Setup Time |
+|---|---|---|---|
+| **Competition Demo** | n8n → FastAPI `/api/v1/intake` | None | 5 minutes |
+| **Production** | WhatsApp/Instagram/Email platform → FastAPI webhook receivers | Meta Business Account, Gmail App Password | 30–60 minutes |
+
 ---
 
 ## 🏗️ Architecture
@@ -123,6 +134,27 @@ KB Search (ChromaDB + Keyword Hybrid)
 ┌──────────────────┐
 │ Theme Clustering │→ Weekly Theme Report → Monthly Marketing Brief
 └──────────────────┘
+```
+
+### Channel Integration Flow
+
+```
+Competition Demo (Zero Credentials):
+
+    Chat Widget ──→ n8n Chat Intake ──→ ┐
+    WhatsApp ─────→ n8n WA Intake ────→ │
+    Instagram ───→ n8n IG Intake ────→ │ FastAPI /api/v1/intake → Intelligence Loop
+    Email ────────→ n8n Email Intake ─→ ┘
+
+Production (Platform Webhooks):
+
+    WhatsApp Business API ──→ /api/v1/channels/whatsapp/webhook ──→ ┐
+    Instagram Graph API ────→ /api/v1/channels/instagram/webhook ─→ │
+    Mailgun/SendGrid ──────→ /api/v1/channels/email/webhook ──────→ │ FastAPI /api/v1/intake → Intelligence Loop
+    Gmail IMAP Poller ─────→ /api/v1/channels/email/imap-fetch ──→ ┘
+
+Both paths converge on the same intelligence loop. The competition demo uses
+n8n webhook triggers; production uses platform webhooks. No code changes needed.
 ```
 
 ---
