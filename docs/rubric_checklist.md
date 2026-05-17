@@ -24,7 +24,7 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 | **n8n workflow** | Complete intelligence loop: multi-channel intake → intent classification → KB retrieval → reply/gap routing → KB auto-update → theme clustering → marketing brief. Exported JSON in `n8n/workflows/boldr_intelligence_loop.json`. |
 | **Docker Compose deployment** | `docker compose up -d` starts all services (n8n, ChromaDB, Streamlit app). Verified on clean Ubuntu 22.04. |
 | **70-ticket test coverage** | All 70 challenge tickets processed through the workflow. 50 answerable by KB → auto-drafted replies. 20 knowledge gaps → correctly classified as order ops (10) vs. true gaps (10). |
-| **Multi-channel intake** | n8n triggers for Email (Gmail), Instagram DM, WhatsApp, and chat webhook — matching the 4-channel distribution in the dataset. |
+| **Multi-channel intake** | n8n webhook triggers for Chat, WhatsApp, Instagram DM, and Email — matching the 4-channel distribution in the dataset. All intake uses internal FastAPI HTTP endpoints — zero external OAuth credentials required. |
 
 ### 1.2 Stability & Error Handling ✅
 
@@ -186,7 +186,7 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 | Evidence | Detail |
 |---|---|
 | **Fail-safe, not fail-open** | If the LLM is unavailable, ALL enquiries route to the CS team. The system never sends unreviewed AI-generated content. |
-| **Graceful degradation** | If ChromaDB is down, keyword-only fallback. If n8n is down, email continues to accumulate in Gmail (no data loss). |
+| **Graceful degradation** | If ChromaDB is down, keyword-only fallback. If n8n is down, intake webhooks return 503 and can be retried. If LLM is unavailable, all queries route to CS team (fail-safe, not fail-open). No single point of failure. |
 
 ---
 
