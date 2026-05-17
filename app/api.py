@@ -34,6 +34,8 @@ from app.queue.approval_queue import (
 )
 from app.audit.audit_log import log_ticket_processing, get_recent_tickets, get_ticket_by_id, get_audit_summary
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.privacy.pii_strip import strip_pii, get_pii_stats, is_pii_stripping_enabled, PATTERNS
+from app.channels import whatsapp_router, instagram_router, email_router
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +58,11 @@ app.add_middleware(
 
 # Rate limiting middleware
 app.add_middleware(RateLimitMiddleware, rate_limit_response=True)
+
+# Register channel integration routers
+app.include_router(whatsapp_router)
+app.include_router(instagram_router)
+app.include_router(email_router)
 
 # Pipeline statistics (in-memory, reset on restart)
 pipeline_stats = {
@@ -189,6 +196,7 @@ async def health_check():
         "author": "Steve Ng, Founder and CEO — Digital Futures Consultancy LLP",
         "tickets_processed": pipeline_stats["total_tickets"],
         "uptime_since": pipeline_stats["start_time"],
+        "pii_stripping_enabled": is_pii_stripping_enabled(),
     }
 
 
@@ -200,6 +208,18 @@ async def process_intake(message: IntakeMessage):
     """
     # Route the message (check for escalation)
     routing = channel_router.route(message.model_dump())
+
+    # Strip PII from message text if enabled (default: off for competition demo)
+    # When PII_STRIP_ENABLED=true in .env, emails, phones, NRIC, credit cards
+    # are replaced with [EMAIL_REDACTED], [PHONE_REDACTED], etc.
+    original_message = message.message
+    original_sender_name = message.sender_name
+    if is_pii_stripping_enabled():
+        message.message = strip_pii(message.message)
+        message.sender_name = strip_pii(message.sender_name) if message.sender_name != "there" else message.sender_name
+        message.subject = strip_pii(message.subject) if message.subject else message.subject
+        pii_stats = get_pii_stats(original_message)
+        logger.info(f"PII stripping enabled: {pii_stats['total_redactions']} redactions for ticket")
 
     # Classify intent and persona
     intent_result = classify_intent_fn(
@@ -576,3 +596,26 @@ async def get_pipeline_stats():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# --- PII Stripping Endpoints ---
+
+@app.post("/api/v1/pii/strip")
+async def strip_pii_endpoint(text: str, enabled: Optional[bool] = None):
+    """Strip PII from a text string.
+
+    By default, respects the PII_STRIP_ENABLED environment variable.
+    Pass ?enabled=true to force stripping regardless of config.
+    """
+    result = strip_pii(text, enabled=enabled)
+    stats = get_pii_stats(text, enabled=enabled)
+    return {"original_length": len(text), "redacted_length": len(result), "redaction_stats": stats, "redacted_text": result}
+
+
+@app.get("/api/v1/pii/status")
+async def pii_status():
+    """Get PII stripping configuration status."""
+    return {
+        "pii_stripping_enabled": is_pii_stripping_enabled(),
+        "patterns_configured": list(PATTERNS.keys()),
+        "note": "PII stripping is OFF by default for the competition demo. Set PII_STRIP_ENABLED=true in .env to enable.",
+    }

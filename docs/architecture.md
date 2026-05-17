@@ -98,12 +98,14 @@ graph TB
 | **Vector Store** | ChromaDB | Stores and retrieves KB document embeddings | `chromadb/chroma:latest` |
 | **LLM** | GLM-5.1:cloud via Ollama | Classification, drafting, clustering, gap detection | Local inference (no container) |
 | **Embedding** | all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
-| **API Server** | FastAPI + Uvicorn | 25 REST endpoints for the intelligence loop | Local process (port 8000) |
+| **API Server** | FastAPI + Uvicorn | 29 REST endpoints for the intelligence loop | Docker container (supervisord) |
 | **Rate Limiter** | Token Bucket (in-memory) | Per-IP rate limiting: 2/sec intake, 5/sec general, 10/sec stats | Built into FastAPI middleware |
 | **Approval Queue** | SQLite (data/boldr_queue.db) | Persistent reply + KB approval queue | Built into Python app |
 | **Audit Log** | SQLite (data/boldr_audit.db) | Persistent ticket processing log for transparency | Built into Python app |
 | **Product Lookup** | In-memory catalogue | Shopify-simulated product, strap, engraving, servicing, order lookup | Built into Python app |
-| **Dashboard** | Streamlit | Live pipeline stats, approval queue, theme analysis, KB search, marketing brief | Local process (port 8501) |
+| **PII Stripping** | Regex-based redaction | GDPR/PDPA-compliant PII redaction (emails, phones, NRIC, credit cards) | Built into Python app (configurable, default: OFF) |
+| **Channel Integration** | Webhook receivers | WhatsApp Business API, Instagram Graph API, Email (IMAP/webhook) | Built into FastAPI routers |
+| **Dashboard** | Streamlit | 9 tabs with live data, KPI cards, approval queue, audit log, channel analytics | Docker container (supervisord) |
 | **Knowledge Base** | Markdown + JSON + CSV + PDF + DOCX | Source documents, version-controlled in Git | Volume mount |
 
 ---

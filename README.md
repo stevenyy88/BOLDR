@@ -8,7 +8,7 @@
 
 ## 🔌 API Reference
 
-The FastAPI server exposes **25 endpoints** across 9 functional groups, protected by rate limiting (X-RateLimit headers on every response):
+The FastAPI server exposes **29 endpoints** across 12 functional groups, protected by rate limiting (X-RateLimit headers on every response):
 
 ### Rate Limits
 | Endpoint Group | Sustained Rate | Burst | |
@@ -62,11 +62,6 @@ The FastAPI server exposes **25 endpoints** across 9 functional groups, protecte
 | `GET` | `/api/v1/sop/routing/{question_type}` | SOP routing for a question type |
 | `GET` | `/api/v1/sop/tone` | BOLDR brand voice tone guidelines |
 
-### Monitoring
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/stats` | Live pipeline statistics (tickets, channels, intents, personas, KB info) |
-
 ### Audit Log
 | Method | Endpoint | Description |
 |---|---|---|
@@ -78,6 +73,22 @@ The FastAPI server exposes **25 endpoints** across 9 functional groups, protecte
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/v1/stats` | Live pipeline statistics (tickets, channels, intents, personas, KB info) |
+
+### Channel Integrations (Production Webhooks)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/channels/whatsapp/webhook` | WhatsApp Business API webhook verification (hub.mode, hub.challenge, hub.verify_token) |
+| `POST` | `/api/v1/channels/whatsapp/webhook` | WhatsApp Business API incoming message webhook |
+| `GET` | `/api/v1/channels/instagram/webhook` | Instagram Graph API webhook verification |
+| `POST` | `/api/v1/channels/instagram/webhook` | Instagram Graph API incoming DM webhook |
+| `POST` | `/api/v1/channels/email/webhook` | Email inbound webhook (Mailgun, SendGrid, Postmark, custom IMAP) |
+| `POST` | `/api/v1/channels/email/imap-fetch` | Fetch recent emails from IMAP server (for scheduled polling) |
+
+### PII Stripping (GDPR/PDPA Compliance)
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/v1/pii/strip?text=...&enabled=true` | Strip PII from a text string (emails, phones, NRIC, credit cards) |
+| `GET` | `/api/v1/pii/status` | Get PII stripping configuration status |
 
 All endpoints are documented at http://localhost:8000/docs (Swagger UI) when the server is running.
 
@@ -124,9 +135,11 @@ KB Search (ChromaDB + Keyword Hybrid)
 | Vector Store | ChromaDB | Docker container, port 8100 |
 | LLM | GLM-5.1:cloud via Ollama | Local inference, OpenAI-compatible API |
 | Embeddings | all-MiniLM-L6-v2 | Built into Python app via sentence-transformers |
-| API Server | FastAPI + Uvicorn | Local process, port 8000, rate limited |
-| Dashboard | Streamlit | Local process, port 8501, 9 tabs with live data + KPI cards |
+| API Server | FastAPI + Uvicorn | Docker container (supervisord), port 8000, rate limited |
+| Dashboard | Streamlit | Docker container (supervisord), port 8501, 9 tabs with live data + KPI cards |
 | Knowledge Base | Markdown + JSON + CSV + PDF + DOCX | Version-controlled in repo |
+| PII Stripping | Configurable (default: OFF) | GDPR/PDPA compliance; strips emails, phones, NRIC, credit cards |
+| Channel Webhooks | WhatsApp, Instagram, Email | Production-ready Meta webhook verification + IMAP fetch |
 
 ### Alternative Stack Comparison
 
@@ -135,6 +148,37 @@ See [project_plan.md](../project_plan.md) §5 for full tech stack justification 
 ---
 
 ## 🚀 Quick Start
+
+### Option A: Docker Compose (Recommended for Production)
+
+```bash
+# Clone the repository
+git clone https://github.com/stevenyy88/BOLDR.git
+cd BOLDR
+
+# Copy environment template (pre-configured for local Ollama)
+cp .env.example .env
+
+# Start ALL services (ChromaDB + n8n + BOLDR App)
+docker compose up -d
+
+# Wait for services to be healthy (about 60 seconds)
+sleep 60
+
+# Seed the knowledge base (93 chunks from 5 source documents)
+python scripts/index_kb.py --data-dir "../dataset" --chroma-host localhost --chroma-port 8100
+
+# Import n8n workflows (5 workflows: chat, whatsapp, instagram, email, intelligence loop)
+python scripts/import_workflows.py --activate --force
+
+# Access the services:
+# - FastAPI Intelligence API: http://localhost:8000/docs
+# - Streamlit Dashboard:       http://localhost:8501
+# - n8n Workflow Editor:        http://localhost:5678
+# - ChromaDB:                   http://localhost:8100
+```
+
+### Option B: Local Development (venv)
 
 ```bash
 # Clone the repository
@@ -149,7 +193,7 @@ pip install -r app/requirements.txt
 # Copy environment template (pre-configured for local Ollama)
 cp .env.example .env
 
-# Start Docker services (ChromaDB + n8n)
+# Start Docker services (ChromaDB + n8n only — app runs locally)
 docker compose up -d chromadb n8n
 
 # Wait for services to be healthy
@@ -212,9 +256,14 @@ BOLDR/
 │   ├── shopify/              # Shopify product/order lookup (simulated)
 │   │   ├── __init__.py
 │   │   └── product_lookup.py   # Product catalogue, straps, engraving, servicing, orders
+│   ├── channels/              # Real channel integration (WhatsApp, Instagram, Email webhooks)
+│   │   └── __init__.py         # Production webhook receivers for Meta APIs + IMAP
 │   ├── middleware/            # Rate limiting middleware
 │   │   ├── __init__.py
 │   │   └── rate_limit.py       # Token bucket rate limiter (2-10 req/sec per IP)
+│   ├── privacy/              # PII stripping (GDPR/PDPA compliance)
+│   │   ├── __init__.py
+│   │   └── pii_strip.py        # Configurable PII redaction (email, phone, NRIC, credit card)
 │   ├── audit/                # SQLite-backed audit log
 │   │   ├── __init__.py
 │   │   └── audit_log.py        # Ticket processing log for transparency & auditability

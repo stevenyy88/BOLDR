@@ -55,6 +55,9 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 | **Hybrid search** | Vector search (ChromaDB/BGE-m3) + keyword fallback ensures both semantic and exact-match queries succeed. |
 | **SOP-derived routing** | Routing logic extracted from CS SOP prose (not hard-coded rules), including escalation triggers for angry customers, chargebacks, warranty claims, corporate orders, and press. |
 | **Gap classification** | Distinguishes "needs Shopify data" (order operations) from "needs new KB entry" (true knowledge gap) — critical for BOLDR's workflow. |
+| **Real channel integration** | Production webhook receivers for WhatsApp Business API, Instagram Graph API, and Email (IMAP/webhook). Meta verification endpoints included. |
+| **PII stripping** | GDPR/PDPA-compliant PII redaction (configurable, default OFF). Strips emails, phones, NRIC, credit cards, postal codes. 8 regex patterns. |
+| **Dockerised deployment** | All services in Docker Compose: boldr_app (FastAPI + Streamlit via supervisord), ChromaDB, n8n. Single `docker compose up -d` to start. |
 
 ---
 
@@ -172,7 +175,8 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 | Evidence | Detail |
 |---|---|
 | **Data minimisation** | Only ticket intent and persona tags are persisted. Raw email bodies are not stored beyond processing. |
-| **PII stripping** | Customer PII is stripped before theme clustering. No personal data enters the knowledge base. |
+| **PII stripping** | Configurable PII redaction (PII_STRIP_ENABLED in .env). When enabled, strips emails, phone numbers, NRIC, credit cards, and postal codes before they enter the pipeline. 8 regex patterns covering Singapore and international formats. |
+| **PII API endpoints** | `/api/v1/pii/strip` (on-demand stripping) and `/api/v1/pii/status` (configuration check). Stripping can be forced per-request with `?enabled=true` parameter. |
 | **Self-hosted** | All data stays on BOLDR's infrastructure. No third-party SaaS stores customer data (except LLM API calls, which are stateless). |
 | **Access control** | Streamlit dashboard access controlled by role. Approval queues require authenticated human action. |
 
@@ -253,13 +257,13 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 
 | Criterion | Weight | Self-Score (1–10) | Rationale |
 |---|---|---|---|
-| Technical Execution | 25% | 9/10 | Full closed-loop intelligence system; hybrid search; confidence scoring; Docker deployment; multi-channel; 70-ticket test coverage |
+| Technical Execution | 25% | 9.5/10 | Full closed-loop intelligence system; hybrid search; confidence scoring; Dockerised deployment; real channel webhooks; PII stripping; rate limiting; 29 API endpoints; 70-ticket test coverage |
 | SME Impact & Business Value | 25% | 9/10 | Real SME problem; 60%+ time saved; transforms cost centre to revenue driver; measurable ROI |
 | Cost Efficiency | 20% | 10/10 | ~$5 setup; $20–55/mo; 20–50× ROI; open-source stack; linear scaling; sponsor credit leverage |
-| Responsible AI | 10% | 9/10 | Human-in-the-loop on everything; no auto-send; confidence scoring; PII handling; fail-safe design; audit trail |
-| Presentation Quality | 20% | 9/10 | Structured demo; non-technical narrative; architecture diagrams; comprehensive documentation; concrete examples |
+| Responsible AI | 10% | 9.5/10 | Human-in-the-loop on everything; no auto-send; confidence scoring; configurable PII stripping (GDPR/PDPA); fail-safe design; SQLite audit trail; rate limiting |
+| Presentation Quality | 20% | 8.5/10 | Structured demo; non-technical narrative; architecture diagrams; comprehensive documentation; real channel webhook evidence; Dockerised deployment; screen recording script |
 
-**Weighted Total: 9.1/10**
+**Weighted Total: 9.25/10**
 
 ---
 

@@ -1,6 +1,68 @@
 version: '3.8'
 
+# BOLDR Self-Improving Customer Intelligence Engine
+# Docker Compose — All services in one stack
+#
+# Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)
+# https://DigitalFutures.Asia
+#
+# Services:
+#   boldr_app  — FastAPI + Streamlit (supervisord)
+#   chromadb   — Vector database for Knowledge Base
+#   n8n        — Workflow orchestration engine
+#
+# Quick Start:
+#   1. Copy .env.example to .env and adjust values
+#   2. docker compose up -d
+#   3. Access: FastAPI http://localhost:8000, Streamlit http://localhost:8501, n8n http://localhost:5678
+#
+# To run app locally in venv instead (for development):
+#   1. Comment out the boldr_app service below
+#   2. Run: source .venv/bin/activate && uvicorn app.api:app --host 0.0.0.0 --port 8000
+#   3. Run: streamlit run app/dashboard/app.py --server.port 8501
+
 services:
+  # BOLDR App — FastAPI (port 8000) + Streamlit (port 8501)
+  boldr_app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: boldr_app
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+      - ./dataset:/app/dataset:ro
+    environment:
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - GLM_API_KEY=${GLM_API_KEY:-ollama}
+      - GLM_BASE_URL=${GLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      - GLM_MODEL=${GLM_MODEL:-glm-5.1:cloud}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-ollama}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-http://host.docker.internal:11434/v1}
+      - KB_DATA_DIR=/app/dataset
+      - DATA_DIR=/app/data
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.5}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PII_STRIP_ENABLED=${PII_STRIP_ENABLED:-false}
+      - WHATSAPP_VERIFY_TOKEN=${WHATSAPP_VERIFY_TOKEN:-boldr_verify_2026}
+      - INSTAGRAM_VERIFY_TOKEN=${INSTAGRAM_VERIFY_TOKEN:-boldr_verify_2026}
+      - STREAMLIT_SERVER_HEADLESS=true
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v1/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   # ChromaDB — Vector store for Knowledge Base
   chromadb:
     image: chromadb/chroma:latest
@@ -20,7 +82,7 @@ services:
       retries: 5
       start_period: 30s
 
-  # n8n — Workflow orchestration (depends on ChromaDB)
+  # n8n — Workflow orchestration (depends on ChromaDB and BOLDR App)
   n8n:
     image: n8nio/n8n:latest
     container_name: boldr_n8n
@@ -34,18 +96,20 @@ services:
       - N8N_PORT=${N8N_PORT:-5678}
       - N8N_PROTOCOL=${N8N_PROTOCOL:-http}
       - N8N_SECURE_COOKIE=false
-      - N8N_EDITOR_BASE_URL=http://192.168.1.85:5678
-      - WEBHOOK_URL=http://192.168.1.85:5678/
+      - N8N_EDITOR_BASE_URL=${N8N_EDITOR_BASE_URL:-http://localhost:5678}
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678/}
       - N8N_PAYLOAD_SIZE_MAX=16
       - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=steve@digitalfutures.sg
-      - N8N_BASIC_AUTH_PASSWORD=BolDR2026!demo
-      - N8N_OWNER_EMAIL=steve@digitalfutures.sg
-      - N8N_OWNER_PASSWORD=BolDR2026!demo
-      - N8N_API_KEY=BOLDR_n8n_API_KEY_2026
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-steve@digitalfutures.sg}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-BolDR2026!demo}
+      - N8N_OWNER_EMAIL=${N8N_OWNER_EMAIL:-steve@digitalfutures.sg}
+      - N8N_OWNER_PASSWORD=${N8N_OWNER_PASSWORD:-BolDR2026!demo}
+      - N8N_API_KEY=${N8N_API_KEY:-BOLDR_n8n_api_2026}
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Asia/Singapore}
     depends_on:
       chromadb:
+        condition: service_healthy
+      boldr_app:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -54,6 +118,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   n8n_data:

@@ -81,3 +81,5 @@ htmlcov/
 .streamlit/secrets.toml
 # Team reports (internal)
 docs/team_report.md
+data/boldr_queue.db
+data/boldr_audit.db
