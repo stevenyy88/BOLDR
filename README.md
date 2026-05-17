@@ -6,6 +6,64 @@
 
 ---
 
+## 🔌 API Reference
+
+The FastAPI server exposes **22 endpoints** across 8 functional groups:
+
+### Intelligence Engine
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/health` | Health check (with ticket count + uptime) |
+| `POST` | `/api/v1/intake` | Full intelligence loop (classify → search → draft → queue) |
+| `POST` | `/api/v1/intent` | Standalone intent + persona classification |
+| `POST` | `/api/v1/kb/search` | Search the knowledge base |
+| `POST` | `/api/v1/reply/draft` | Draft a reply in BOLDR brand voice |
+| `POST` | `/api/v1/gap/log` | Log a knowledge gap |
+
+### Shopify Product Lookup
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/shopify/lookup?query=...` | Search products, straps, engraving, servicing, orders |
+| `GET` | `/api/v1/shopify/order/{order_id}` | Order status lookup |
+| `GET` | `/api/v1/shopify/products` | Full product catalogue |
+
+### Approval Queue (SQLite-backed)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/queue/replies` | All queued replies (filter by status) |
+| `GET` | `/api/v1/queue/replies/pending` | Pending replies awaiting approval |
+| `POST` | `/api/v1/queue/replies/{ticket_id}/approve` | Approve a reply for sending |
+| `POST` | `/api/v1/queue/replies/{ticket_id}/reject` | Reject a reply |
+| `GET` | `/api/v1/queue/kb` | Pending KB entries awaiting approval |
+| `POST` | `/api/v1/queue/kb/{entry_id}/approve` | Approve a KB draft |
+
+### Theme Clustering & Marketing
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/themes/weekly` | Weekly theme clustering report |
+| `GET` | `/api/v1/themes/monthly-brief` | Monthly marketing intelligence brief |
+| `POST` | `/api/v1/themes/cluster` | Trigger theme clustering (for scheduled runs) |
+
+### KB Management
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/v1/kb/auto-draft` | Auto-draft a KB entry from a resolved gap |
+
+### SOP & Routing
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/sop/routing/{question_type}` | SOP routing for a question type |
+| `GET` | `/api/v1/sop/tone` | BOLDR brand voice tone guidelines |
+
+### Monitoring
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/stats` | Live pipeline statistics (tickets, channels, intents, personas, KB info) |
+
+All endpoints are documented at http://localhost:8000/docs (Swagger UI) when the server is running.
+
+---
+
 ## 🎯 What This Is
 
 BOLDR is a Singapore-based watch micro-brand with a 3-person customer service team drowning in manual email support. This project transforms their reactive support into a **self-improving intelligence engine** — one that answers questions, identifies knowledge gaps, updates its own Knowledge Base, and generates marketing signals automatically.
@@ -80,6 +138,9 @@ sleep 10
 
 # Seed the knowledge base (93 chunks from 5 source documents)
 python scripts/index_kb.py --data-dir "../dataset" --chroma-host localhost --chroma-port 8100
+
+# Import n8n workflows (5 workflows: chat, whatsapp, instagram, email, intelligence loop)
+python scripts/import_workflows.py --activate --force
 
 # Run tests (all 13 e2e tests should pass)
 python -m pytest app/tests/test_e2e.py -v

@@ -96,10 +96,13 @@ graph TB
 |---|---|---|---|
 | **Workflow Engine** | n8n (self-hosted) | Orchestrates the entire intelligence loop | `n8nio/n8n:latest` |
 | **Vector Store** | ChromaDB | Stores and retrieves KB document embeddings | `chromadb/chroma:latest` |
-| **LLM** | GLM-5.1 (API) + Claude (fallback) | Classification, drafting, clustering, gap detection | Cloud API (no container) |
-| **Embedding** | BGE-m3 / all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
-| **App Server** | Python 3.12 + Streamlit | Dashboard, KB processing, approval queues | `python:3.12-slim` (custom) |
-| **Knowledge Base** | Markdown + JSON + CSV | Source documents, version-controlled in Git | Volume mount |
+| **LLM** | GLM-5.1:cloud via Ollama | Classification, drafting, clustering, gap detection | Local inference (no container) |
+| **Embedding** | all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
+| **API Server** | FastAPI + Uvicorn | 22 REST endpoints for the intelligence loop | Local process (port 8000) |
+| **Approval Queue** | SQLite (data/boldr_queue.db) | Persistent reply + KB approval queue | Built into Python app |
+| **Product Lookup** | In-memory catalogue | Shopify-simulated product, strap, engraving, servicing, order lookup | Built into Python app |
+| **Dashboard** | Streamlit | Live pipeline stats, approval queue, theme analysis, KB search, marketing brief | Local process (port 8501) |
+| **Knowledge Base** | Markdown + JSON + CSV + PDF + DOCX | Source documents, version-controlled in Git | Volume mount |
 
 ---
 
@@ -457,48 +460,71 @@ graph LR
     subgraph Host Machine
         subgraph Docker Compose
             N8N[n8n Container<br/>Port 5678]
-            CHROMA[ChromaDB Container<br/>Port 8000]
-            APP[Python App Container<br/>Port 8501<br/>Streamlit + Processing]
+            CHROMA[ChromaDB Container<br/>Port 8100]
         end
         
-        subgraph Volumes
+        subgraph Local Processes
+            API[FastAPI Server<br/>Port 8000<br/>22 REST Endpoints]
+            DASH[Streamlit Dashboard<br/>Port 8501]
+            OLLAMA[Ollama + GLM-5.1<br/>Port 11434]
+        end
+        
+        subgraph Persistent Storage
             N8N_DATA[n8n_data<br/>Workflows + Credentials]
             CHROMA_DATA[chroma_data<br/>Vector Index + Metadata]
+            SQLITE[data/boldr_queue.db<br/>Approval Queue]
             KB_VOL[kb/<br/>Knowledge Base Files]
-            DATA_VOL[data/<br/>Input Data Files]
         end
     end
     
     subgraph External APIs
-        GLM[GLM-5.1 API<br/>Primary LLM]
+        GLM[GLM-5.1:cloud<br/>Primary LLM]
         CLAUDE[Claude API<br/>Fallback LLM<br/>Low-confidence only]
     end
     
     N8N --- N8N_DATA
     CHROMA --- CHROMA_DATA
-    APP --- KB_VOL
-    APP --- DATA_VOL
+    API --- SQLITE
+    API --- KB_VOL
     
-    N8N <-->|Workflow calls| APP
-    APP <-->|Hybrid search| CHROMA
-    APP <-->|Classification + Drafting| GLM
-    APP -.->|Low-confidence fallback| CLAUDE
-    N8N -.->|Edge case routing| GLM
+    N8N <-->|Workflow calls| API
+    DASH <-->|Live stats + approval| API
+    API <-->|Hybrid search| CHROMA
+    API <-->|Classification + Drafting| OLLAMA
+    API -.->|Low-confidence fallback| CLAUDE
+    N8N -.->|Edge case routing| OLLAMA
     
     style N8N fill:#FF6D5A,color:#fff
     style CHROMA fill:#7C4DFF,color:#fff
-    style APP fill:#1E88E5,color:#fff
-    style GLM fill:#4CAF50,color:#fff
-    style CLAUDE fill:#FF9800,color:#fff
+    style API fill:#1E88E5,color:#fff
+    style DASH fill:#FF9800,color:#fff
+    style OLLAMA fill:#4CAF50,color:#fff
+    style SQLITE fill:#795548,color:#fff
 ```
 
 ### Service Dependencies
 
-| Service | Depends On | Health Check |
-|---|---|---|
-| **n8n** | ChromaDB, App | `wget http://localhost:5678/healthz` |
-| **App** | ChromaDB | `requests.get('http://localhost:8501/_stcore/health')` |
-| **ChromaDB** | None (standalone) | `curl http://localhost:8000/api/v1/heartbeat` |
+| Service | Depends On | Health Check | Startup |
+|---|---|---|---|
+| **n8n** | ChromaDB (healthy) | `wget http://localhost:5678/healthz` | 60s start period |
+| **ChromaDB** | None (standalone) | `curl http://localhost:8000/api/v2/heartbeat` | 30s start period |
+| **FastAPI** | ChromaDB, Ollama | `curl http://localhost:8000/api/v1/health` | Local process |
+| **Streamlit** | FastAPI | `curl http://localhost:8501/_stcore/health` | Local process |
+| **Ollama** | None (standalone) | `curl http://localhost:11434/api/tags` | Local process |
+
+### API Reference (22 Endpoints)
+
+| Group | Endpoints |
+|---|---|
+| **Intelligence Engine** | `POST /intake`, `POST /intent`, `POST /kb/search`, `POST /reply/draft`, `POST /gap/log` |
+| **Shopify Lookup** | `GET /shopify/lookup`, `GET /shopify/order/{id}`, `GET /shopify/products` |
+| **Approval Queue** | `GET /queue/replies`, `GET /queue/replies/pending`, `POST /queue/replies/{id}/approve`, `POST /queue/replies/{id}/reject`, `GET /queue/kb`, `POST /queue/kb/{id}/approve` |
+| **Theme Clustering** | `GET /themes/weekly`, `GET /themes/monthly-brief`, `POST /themes/cluster` |
+| **KB Management** | `POST /kb/auto-draft` |
+| **SOP & Routing** | `GET /sop/routing/{type}`, `GET /sop/tone` |
+| **Monitoring** | `GET /health`, `GET /stats` |
+
+All endpoints are documented at `http://localhost:8000/docs` (Swagger UI).
 
 ### Data Flow Summary
 
@@ -509,17 +535,19 @@ graph LR
     C --> D{Answer Found?}
     D -->|Yes| E[Draft Reply]
     D -->|No| F[Gap Detection]
-    E --> G[Human Approval]
+    E --> G[SQLite Approval Queue]
     F --> H[CS Escalation]
-    G --> I[Send Reply]
+    G --> I[Human Approve/Reject]
     H --> J[CS Resolves]
     J --> K[Auto-Draft KB Entry]
     K --> L[Human KB Approval]
     L --> M[ChromaDB Updated]
     M -.->|System is smarter| C
+    I -->|Approved| N[Send Reply]
     
     style A fill:#4CAF50,color:#fff
-    style I fill:#2196F3,color:#fff
+    style G fill:#795548,color:#fff
+    style N fill:#2196F3,color:#fff
     style M fill:#FF9800,color:#fff
 ```
 
