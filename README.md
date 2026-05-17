@@ -8,7 +8,7 @@
 
 ## 🔌 API Reference
 
-The FastAPI server exposes **29 endpoints** across 12 functional groups, protected by rate limiting (X-RateLimit headers on every response):
+The FastAPI server exposes **31 endpoints** across 12 functional groups, protected by rate limiting (X-RateLimit headers on every response):
 
 ### Rate Limits
 | Endpoint Group | Sustained Rate | Burst | |
@@ -346,6 +346,20 @@ The BOLDR challenge provides 6 files:
 | `05_cs_sop.docx` | DOCX | CS SOP with tone guidelines, escalation rules, new questions log |
 
 **Key insight:** 50/70 tickets are answerable by KB. 20 require gap handling — 10 are order operations (need Shopify), 10 are true knowledge gaps (sustainability, niche specs, collector queries).
+
+---
+
+## 📄 Documentation
+
+| Document | Description |
+|---|---|
+| [Architecture](docs/architecture.md) | System architecture, data flow, API reference, component diagram |
+| [Setup Guide](docs/setup.md) | Prerequisites, installation, configuration, testing |
+| [Demo Script](docs/demo_script.md) | 5-minute demo video walkthrough with timestamps |
+| [Rubric Checklist](docs/rubric_checklist.md) | Competition rubric self-assessment with evidence |
+| [Rubric Self-Assessment](docs/rubric_self_assessment.md) | Detailed feature-by-feature scoring with value for judges |
+| [Project Plan](project_plan.md) | Full 13-section project plan |
+| [Operations Runbook](docs/operations.md) | Operational procedures and troubleshooting |
 
 ---
 

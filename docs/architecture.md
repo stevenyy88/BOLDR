@@ -98,7 +98,7 @@ graph TB
 | **Vector Store** | ChromaDB | Stores and retrieves KB document embeddings | `chromadb/chroma:latest` |
 | **LLM** | GLM-5.1:cloud via Ollama | Classification, drafting, clustering, gap detection | Local inference (no container) |
 | **Embedding** | all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
-| **API Server** | FastAPI + Uvicorn | 29 REST endpoints for the intelligence loop | Docker container (supervisord) |
+| **API Server** | FastAPI + Uvicorn | 31 REST endpoints for the intelligence loop | Docker container (supervisord) |
 | **Rate Limiter** | Token Bucket (in-memory) | Per-IP rate limiting: 2/sec intake, 5/sec general, 10/sec stats | Built into FastAPI middleware |
 | **Approval Queue** | SQLite (data/boldr_queue.db) | Persistent reply + KB approval queue | Built into Python app |
 | **Audit Log** | SQLite (data/boldr_audit.db) | Persistent ticket processing log for transparency | Built into Python app |
@@ -463,20 +463,18 @@ flowchart TD
 graph LR
     subgraph Host Machine
         subgraph Docker Compose
+            APP[BOLDR App Container<br/>FastAPI :8000 + Streamlit :8501<br/>31 REST Endpoints + Dashboard]
             N8N[n8n Container<br/>Port 5678]
             CHROMA[ChromaDB Container<br/>Port 8100]
         end
         
-        subgraph Local Processes
-            API[FastAPI Server<br/>Port 8000<br/>25 REST Endpoints]
-            DASH[Streamlit Dashboard<br/>Port 8501]
-            OLLAMA[Ollama + GLM-5.1<br/>Port 11434]
-        end
+        OLLAMA[Ollama + GLM-5.1<br/>Port 11434]
         
         subgraph Persistent Storage
             N8N_DATA[n8n_data<br/>Workflows + Credentials]
             CHROMA_DATA[chroma_data<br/>Vector Index + Metadata]
-            SQLITE[data/boldr_queue.db<br/>Approval Queue]
+            SQLITE_QUEUE[data/boldr_queue.db<br/>Approval Queue]
+            SQLITE_AUDIT[data/boldr_audit.db<br/>Audit Log]
             KB_VOL[kb/<br/>Knowledge Base Files]
         end
     end
@@ -486,37 +484,43 @@ graph LR
         CLAUDE[Claude API<br/>Fallback LLM<br/>Low-confidence only]
     end
     
+    APP --- SQLITE_QUEUE
+    APP --- SQLITE_AUDIT
+    APP --- KB_VOL
     N8N --- N8N_DATA
     CHROMA --- CHROMA_DATA
-    API --- SQLITE
-    API --- KB_VOL
     
-    N8N <-->|Workflow calls| API
-    DASH <-->|Live stats + approval| API
-    API <-->|Hybrid search| CHROMA
-    API <-->|Classification + Drafting| OLLAMA
-    API -.->|Low-confidence fallback| CLAUDE
+    N8N <-->|Workflow calls| APP
+    APP <-->|Hybrid search| CHROMA
+    APP <-->|Classification + Drafting| OLLAMA
+    APP -.->|Low-confidence fallback| CLAUDE
     N8N -.->|Edge case routing| OLLAMA
     
+    style APP fill:#1E88E5,color:#fff
     style N8N fill:#FF6D5A,color:#fff
     style CHROMA fill:#7C4DFF,color:#fff
-    style API fill:#1E88E5,color:#fff
-    style DASH fill:#FF9800,color:#fff
     style OLLAMA fill:#4CAF50,color:#fff
-    style SQLITE fill:#795548,color:#fff
+    style SQLITE_QUEUE fill:#795548,color:#fff
+    style SQLITE_AUDIT fill:#795548,color:#fff
 ```
+
+### Two Deployment Modes
+
+| Mode | Command | Services | Notes |
+|---|---|---|---|
+| **Docker Compose (Production)** | `docker compose up -d` | boldr_app + chromadb + n8n | All services containerised. Requires Ollama on host. |
+| **Local Development (venv)** | `uvicorn` + `streamlit` | chromadb + n8n in Docker, app locally | For development. Requires Python venv. |
 
 ### Service Dependencies
 
 | Service | Depends On | Health Check | Startup |
 |---|---|---|---|
-| **n8n** | ChromaDB (healthy) | `wget http://localhost:5678/healthz` | 60s start period |
+| **boldr_app** | ChromaDB (healthy) | `curl http://localhost:8000/api/v1/health` | 60s start period |
+| **n8n** | ChromaDB (healthy), boldr_app (healthy) | `wget http://localhost:5678/healthz` | 60s start period |
 | **ChromaDB** | None (standalone) | `curl http://localhost:8000/api/v2/heartbeat` | 30s start period |
-| **FastAPI** | ChromaDB, Ollama | `curl http://localhost:8000/api/v1/health` | Local process |
-| **Streamlit** | FastAPI | `curl http://localhost:8501/_stcore/health` | Local process |
-| **Ollama** | None (standalone) | `curl http://localhost:11434/api/tags` | Local process |
+| **Ollama** | None (standalone) | `curl http://localhost:11434/api/tags` | Local process (not containerised) |
 
-### API Reference (22 Endpoints)
+### API Reference (31 Endpoints)
 
 | Group | Endpoints |
 |---|---|
@@ -528,6 +532,8 @@ graph LR
 | **SOP & Routing** | `GET /sop/routing/{type}`, `GET /sop/tone` |
 | **Monitoring** | `GET /health`, `GET /stats` |
 | **Audit Log** | `GET /audit/recent`, `GET /audit/summary`, `GET /audit/ticket/{id}` |
+| **Channel Integration** | `GET /channels/whatsapp/webhook`, `POST /channels/whatsapp/webhook`, `GET /channels/instagram/webhook`, `POST /channels/instagram/webhook`, `POST /channels/email/webhook`, `POST /channels/email/imap-fetch` |
+| **PII Stripping** | `POST /pii/strip`, `GET /pii/status` |
 
 All endpoints are documented at `http://localhost:8000/docs` (Swagger UI).
 
