@@ -34,6 +34,8 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 | **Confidence scoring** | Hybrid retrieval (vector + keyword) produces confidence scores 0–1. Scores below threshold (default 0.5) trigger CS escalation, not fabrication. |
 | **Health checks** | Docker Compose includes health checks for n8n, ChromaDB, and the Streamlit app. Automatic restart on failure. |
 | **n8n execution logs** | Every node execution logged with timestamps, input/output, and error details. Full audit trail. |
+| **Rate limiting** | Token bucket rate limiter protects the API: 2 req/sec sustained for intake endpoints (15 burst), 5/sec for general (30 burst), 10/sec for stats (60 burst). X-RateLimit headers on every response. |
+| **Audit logging** | Every ticket classification decision is persisted to SQLite audit database with timestamp, confidence score, and routing details. `/api/v1/audit/recent`, `/audit/summary`, `/audit/ticket/{id}` endpoints. |
 
 ### 1.3 Realistically Deployable ✅
 

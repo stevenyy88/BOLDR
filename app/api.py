@@ -33,6 +33,7 @@ from app.queue.approval_queue import (
     approve_reply, reject_reply, enqueue_kb_entry, get_pending_kb_entries, approve_kb_entry,
 )
 from app.audit.audit_log import log_ticket_processing, get_recent_tickets, get_ticket_by_id, get_audit_summary
+from app.middleware.rate_limit import RateLimitMiddleware
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate limiting middleware
+app.add_middleware(RateLimitMiddleware, rate_limit_response=True)
 
 # Pipeline statistics (in-memory, reset on restart)
 pipeline_stats = {

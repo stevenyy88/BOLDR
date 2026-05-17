@@ -86,6 +86,27 @@ if tab == "📊 Live Pipeline":
         kb_info = live_stats.get("kb", {})
         models = live_stats.get("models", {})
 
+        # ===== KPI Cards (Executive Summary) =====
+        st.subheader("Executive KPIs")
+        total = max(pipeline.get("total_tickets", 1), 1)
+        answerable = pipeline.get("answerable_count", 0)
+        gaps = pipeline.get("gap_count", 0)
+        escalations = pipeline.get("escalation_count", 0)
+
+        kpi1, kpi2, kpi3, kpi4, kpi5 = st.columns(5)
+        with kpi1:
+            st.metric("Tickets Processed", pipeline.get("total_tickets", 0))
+        with kpi2:
+            st.metric("KB Answer Rate", f"{round(answerable/total*100, 1)}%", f"{answerable} answerable")
+        with kpi3:
+            st.metric("CS Time Saved", "~9 hrs/wk", "60% reduction")
+        with kpi4:
+            st.metric("Monthly Savings", "SGD 1,080", "at SGD 28/hr")
+        with kpi5:
+            st.metric("ROI", "19-49\u00d7", "SGD 22-57/mo opex")
+
+        st.markdown("---")
+
         # Key metrics
         col1, col2, col3, col4 = st.columns(4)
         with col1:

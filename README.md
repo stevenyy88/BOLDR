@@ -8,7 +8,14 @@
 
 ## 🔌 API Reference
 
-The FastAPI server exposes **25 endpoints** across 9 functional groups:
+The FastAPI server exposes **25 endpoints** across 9 functional groups, protected by rate limiting (X-RateLimit headers on every response):
+
+### Rate Limits
+| Endpoint Group | Sustained Rate | Burst | |
+|---|---|---|---|
+| Intake (POST /intake, /intent) | 2 req/sec | 15 | Protects classification pipeline |
+| Stats/Health/Audit (GET) | 10 req/sec | 60 | Lightweight read-only endpoints |
+| General (all other endpoints) | 5 req/sec | 30 | Standard API access |
 
 ### Intelligence Engine
 | Method | Endpoint | Description |
@@ -117,8 +124,8 @@ KB Search (ChromaDB + Keyword Hybrid)
 | Vector Store | ChromaDB | Docker container, port 8100 |
 | LLM | GLM-5.1:cloud via Ollama | Local inference, OpenAI-compatible API |
 | Embeddings | all-MiniLM-L6-v2 | Built into Python app via sentence-transformers |
-| API Server | FastAPI + Uvicorn | Local process, port 8000 |
-| Dashboard | Streamlit | Local process, port 8501 |
+| API Server | FastAPI + Uvicorn | Local process, port 8000, rate limited |
+| Dashboard | Streamlit | Local process, port 8501, 9 tabs with live data + KPI cards |
 | Knowledge Base | Markdown + JSON + CSV + PDF + DOCX | Version-controlled in repo |
 
 ### Alternative Stack Comparison
@@ -205,6 +212,9 @@ BOLDR/
 │   ├── shopify/              # Shopify product/order lookup (simulated)
 │   │   ├── __init__.py
 │   │   └── product_lookup.py   # Product catalogue, straps, engraving, servicing, orders
+│   ├── middleware/            # Rate limiting middleware
+│   │   ├── __init__.py
+│   │   └── rate_limit.py       # Token bucket rate limiter (2-10 req/sec per IP)
 │   ├── audit/                # SQLite-backed audit log
 │   │   ├── __init__.py
 │   │   └── audit_log.py        # Ticket processing log for transparency & auditability

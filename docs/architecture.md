@@ -98,7 +98,8 @@ graph TB
 | **Vector Store** | ChromaDB | Stores and retrieves KB document embeddings | `chromadb/chroma:latest` |
 | **LLM** | GLM-5.1:cloud via Ollama | Classification, drafting, clustering, gap detection | Local inference (no container) |
 | **Embedding** | all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
-| **API Server** | FastAPI + Uvicorn | 22 REST endpoints for the intelligence loop | Local process (port 8000) |
+| **API Server** | FastAPI + Uvicorn | 25 REST endpoints for the intelligence loop | Local process (port 8000) |
+| **Rate Limiter** | Token Bucket (in-memory) | Per-IP rate limiting: 2/sec intake, 5/sec general, 10/sec stats | Built into FastAPI middleware |
 | **Approval Queue** | SQLite (data/boldr_queue.db) | Persistent reply + KB approval queue | Built into Python app |
 | **Audit Log** | SQLite (data/boldr_audit.db) | Persistent ticket processing log for transparency | Built into Python app |
 | **Product Lookup** | In-memory catalogue | Shopify-simulated product, strap, engraving, servicing, order lookup | Built into Python app |
@@ -465,7 +466,7 @@ graph LR
         end
         
         subgraph Local Processes
-            API[FastAPI Server<br/>Port 8000<br/>22 REST Endpoints]
+            API[FastAPI Server<br/>Port 8000<br/>25 REST Endpoints]
             DASH[Streamlit Dashboard<br/>Port 8501]
             OLLAMA[Ollama + GLM-5.1<br/>Port 11434]
         end
