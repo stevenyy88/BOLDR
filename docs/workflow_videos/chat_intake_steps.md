@@ -31,3 +31,35 @@ curl -X POST http://192.168.1.85:5678/webhook/chat \
 
 ---
 *Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
+
+## Execution Demo Video
+
+📹 `chat_intake_execution_demo.mp4` — Step-by-step execution walkthrough showing real data flowing through each node.
+
+### Real Test Results
+
+**Input Message:** `Hi, I am interested in the BOLDR Venture watch. How much does it cost?`
+
+**Classification Result:**
+```json
+{
+  "ticket_id": "TKT-61834",
+  "question_type": "product_general",
+  "buyer_persona": "prospect",
+  "confidence": 1.0,
+  "is_answerable": true,
+  "answerability_type": "kb_answerable",
+  "escalation_required": false,
+  "escalation_reason": null,
+  "sop_routing": "Product One-Pager + FAQ",
+  "needs_shopify": false
+}
+```
+
+**Final Response:**
+```json
+{
+  "status": "received",
+  "message": "Your message has been received. We'll respond shortly!"
+}
+```

@@ -37,3 +37,39 @@ curl -X POST http://192.168.1.85:5678/webhook/boldr-intake \
 
 ---
 *Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
+
+## Execution Demo Video
+
+📹 `intelligence_loop_execution_demo.mp4` — Step-by-step execution walkthrough showing real data flowing through each node.
+
+### Real Test Results
+
+**Input Message:** `How much does the BOLDR Venture cost?`
+
+**Classification Result:**
+```json
+{
+  "ticket_id": "TKT-72535",
+  "question_type": "product_general",
+  "buyer_persona": "prospect",
+  "confidence": 1.0,
+  "is_answerable": true,
+  "answerability_type": "kb_answerable",
+  "escalation_required": false,
+  "escalation_reason": null,
+  "sop_routing": "Product One-Pager + FAQ",
+  "needs_shopify": false
+}
+```
+
+**Final Response:**
+```json
+{
+  "status": "processed",
+  "ticket_id": "TKT-72535",
+  "question_type": "product_general",
+  "persona": "prospect",
+  "is_answerable": false,
+  "message": "Your message has been processed. We'll get back to you shortly!"
+}
+```

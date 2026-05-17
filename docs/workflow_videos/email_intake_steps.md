@@ -31,3 +31,34 @@ curl -X POST http://192.168.1.85:5678/webhook/email \
 
 ---
 *Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
+
+## Execution Demo Video
+
+📹 `email_intake_execution_demo.mp4` — Step-by-step execution walkthrough showing real data flowing through each node.
+
+### Real Test Results
+
+**Input Message:** `I need a warranty claim for my BOLDR Odyssey`
+
+**Classification Result:**
+```json
+{
+  "ticket_id": "TKT-83517",
+  "question_type": "servicing",
+  "buyer_persona": "owner_aftercare",
+  "confidence": 1.0,
+  "is_answerable": false,
+  "answerability_type": "shopify_required",
+  "escalation_required": false,
+  "escalation_reason": null,
+  "sop_routing": "Servicing Rate Card",
+  "needs_shopify": false
+}
+```
+
+**Final Response:**
+```json
+{
+  "raw": ""
+}
+```

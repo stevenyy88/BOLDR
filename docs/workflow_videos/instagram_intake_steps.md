@@ -31,3 +31,35 @@ curl -X POST http://192.168.1.85:5678/webhook/instagram-dm \
 
 ---
 *Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
+
+## Execution Demo Video
+
+📹 `instagram_intake_execution_demo.mp4` — Step-by-step execution walkthrough showing real data flowing through each node.
+
+### Real Test Results
+
+**Input Message:** `Do you offer engraving services?`
+
+**Classification Result:**
+```json
+{
+  "ticket_id": "TKT-25129",
+  "question_type": "engraving",
+  "buyer_persona": "gifter",
+  "confidence": 1.0,
+  "is_answerable": true,
+  "answerability_type": "kb_answerable",
+  "escalation_required": false,
+  "escalation_reason": null,
+  "sop_routing": "Engraving Rate Card",
+  "needs_shopify": false
+}
+```
+
+**Final Response:**
+```json
+{
+  "status": "received",
+  "message": "Your Instagram message has been received. We'll respond shortly!"
+}
+```
