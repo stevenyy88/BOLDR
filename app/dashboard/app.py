@@ -156,11 +156,11 @@ elif tab == "📈 Marketing Brief":
     # Marketing signals
     st.subheader("Marketing Signals")
     signals = [
-        {"Signal": "BPA-free straps", "Frequency": 3+, "Persona": "Health-Conscious", "Action": 'Product badge: "BPA-Free Straps"', "Priority": "🔴 High"},
-        {"Signal": "Vegan materials", "Frequency": 1+, "Persona": "Sustainability Advocate", "Action": "Develop vegan strap positioning", "Priority": "🔴 High"},
-        {"Signal": "Corporate gifting", "Frequency": 1+, "Persona": "Gifter", "Action": "Create bulk pricing KB entry + gifting page", "Priority": "🟡 Medium"},
-        {"Signal": "Nickel allergy", "Frequency": 4+, "Persona": "Health-Conscious", "Action": "Add hypoallergenic product page section", "Priority": "🟡 Medium"},
-        {"Signal": "Magnetic field resistance", "Frequency": 1+, "Persona": "Niche Buyer", "Action": "Add MRI safety note to product specs", "Priority": "🟢 Low"},
+        {"Signal": "BPA-free straps", "Frequency": "3+", "Persona": "Health-Conscious", "Action": 'Product badge: "BPA-Free Straps"', "Priority": "🔴 High"},
+        {"Signal": "Vegan materials", "Frequency": "1+", "Persona": "Sustainability Advocate", "Action": "Develop vegan strap positioning", "Priority": "🔴 High"},
+        {"Signal": "Corporate gifting", "Frequency": "1+", "Persona": "Gifter", "Action": "Create bulk pricing KB entry + gifting page", "Priority": "🟡 Medium"},
+        {"Signal": "Nickel allergy", "Frequency": "4+", "Persona": "Health-Conscious", "Action": "Add hypoallergenic product page section", "Priority": "🟡 Medium"},
+        {"Signal": "Magnetic field resistance", "Frequency": "1+", "Persona": "Niche Buyer", "Action": "Add MRI safety note to product specs", "Priority": "🟢 Low"},
     ]
     st.dataframe(signals, use_container_width=True)
 
