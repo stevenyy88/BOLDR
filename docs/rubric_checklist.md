@@ -161,9 +161,9 @@ This checklist maps every ECHELON 2026 rubric criterion to specific evidence fro
 
 | Evidence | Detail |
 |---|---|
-| **Classification logging** | Every intent and persona classification is logged with reasoning. n8n execution logs show every node's input/output. |
+| **Classification logging** | Every intent and persona classification is logged to SQLite audit database. `/api/v1/audit/recent`, `/audit/summary`, `/audit/ticket/{id}` endpoints provide full traceability. n8n execution logs show every node's input/output. |
 | **KB version history** | Git-based version control. Every KB entry shows source, approval timestamp, and editor. Diff view and rollback available. |
-| **Decision audit trail** | Full traceability from ticket intake → classification → retrieval → routing → reply/gap → approval. |
+| **Decision audit trail** | Full traceability from ticket intake → classification → retrieval → routing → reply/gap → approval. Every decision persisted in SQLite with timestamp, confidence score, and reasoning. |
 
 ### 4.4 Privacy & PII ✅
 

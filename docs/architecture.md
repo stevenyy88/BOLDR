@@ -100,6 +100,7 @@ graph TB
 | **Embedding** | all-MiniLM-L6-v2 | Document and query embedding | Built into Python app |
 | **API Server** | FastAPI + Uvicorn | 22 REST endpoints for the intelligence loop | Local process (port 8000) |
 | **Approval Queue** | SQLite (data/boldr_queue.db) | Persistent reply + KB approval queue | Built into Python app |
+| **Audit Log** | SQLite (data/boldr_audit.db) | Persistent ticket processing log for transparency | Built into Python app |
 | **Product Lookup** | In-memory catalogue | Shopify-simulated product, strap, engraving, servicing, order lookup | Built into Python app |
 | **Dashboard** | Streamlit | Live pipeline stats, approval queue, theme analysis, KB search, marketing brief | Local process (port 8501) |
 | **Knowledge Base** | Markdown + JSON + CSV + PDF + DOCX | Source documents, version-controlled in Git | Volume mount |
@@ -523,6 +524,7 @@ graph LR
 | **KB Management** | `POST /kb/auto-draft` |
 | **SOP & Routing** | `GET /sop/routing/{type}`, `GET /sop/tone` |
 | **Monitoring** | `GET /health`, `GET /stats` |
+| **Audit Log** | `GET /audit/recent`, `GET /audit/summary`, `GET /audit/ticket/{id}` |
 
 All endpoints are documented at `http://localhost:8000/docs` (Swagger UI).
 

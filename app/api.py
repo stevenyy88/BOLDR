@@ -32,6 +32,7 @@ from app.queue.approval_queue import (
     QueuedReply, enqueue_reply, get_pending_replies, get_all_replies,
     approve_reply, reject_reply, enqueue_kb_entry, get_pending_kb_entries, approve_kb_entry,
 )
+from app.audit.audit_log import log_ticket_processing, get_recent_tickets, get_ticket_by_id, get_audit_summary
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +266,27 @@ async def process_intake(message: IntakeMessage):
         )
         enqueue_reply(queued_reply)
 
+    # Audit log (SQLite persistence)
+    log_ticket_processing(
+        ticket_id=classification.ticket_id,
+        channel=message.channel,
+        sender_name=message.sender_name or "there",
+        subject=message.subject,
+        original_message=message.message[:500],
+        question_type=intent_result.question_type,
+        buyer_persona=persona_result.persona,
+        confidence=intent_result.question_type_confidence,
+        is_answerable=answerability in (AnswerabilityResult.ANSWERABLE, AnswerabilityResult.NEEDS_SHOPIFY),
+        answerability_type=answerability.value,
+        escalation_required=routing["escalation"] or classification.escalation_required,
+        escalation_reason=routing.get("escalation_reason") or classification.escalation_reason or "",
+        sop_routing=sop_routing["source"] if sop_routing else "N/A",
+        needs_shopify=sop_parser.requires_shopify(intent_result.question_type),
+        kb_best_match=kb_best_match.get("source", "") if isinstance(kb_best_match, dict) else "",
+        kb_confidence=best_score,
+        reply_queued=bool(reply_data),
+    )
+
     # Update pipeline statistics
     pipeline_stats["total_tickets"] += 1
     pipeline_stats["tickets_by_channel"][message.channel] = pipeline_stats["tickets_by_channel"].get(message.channel, 0) + 1
@@ -486,6 +508,29 @@ async def trigger_theme_clustering():
         "monthly_brief": brief,
         "note": "In production, this endpoint is called by n8n scheduled trigger or cron job.",
     }
+
+
+# --- Audit Log Endpoints ---
+
+@app.get("/api/v1/audit/recent")
+async def get_audit_recent(limit: int = 50, offset: int = 0):
+    """Get recent ticket processing events from the audit log."""
+    return {"tickets": get_recent_tickets(limit=limit, offset=offset)}
+
+
+@app.get("/api/v1/audit/summary")
+async def get_audit_summary_endpoint():
+    """Get audit summary statistics."""
+    return get_audit_summary()
+
+
+@app.get("/api/v1/audit/ticket/{ticket_id}")
+async def get_audit_ticket(ticket_id: str):
+    """Get a specific ticket's audit record."""
+    record = get_ticket_by_id(ticket_id)
+    if not record:
+        raise HTTPException(status_code=404, detail=f"Ticket not found: {ticket_id}")
+    return record
 
 
 @app.get("/api/v1/sop/routing/{question_type}")

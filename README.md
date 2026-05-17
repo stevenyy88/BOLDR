@@ -8,7 +8,7 @@
 
 ## 🔌 API Reference
 
-The FastAPI server exposes **22 endpoints** across 8 functional groups:
+The FastAPI server exposes **25 endpoints** across 9 functional groups:
 
 ### Intelligence Engine
 | Method | Endpoint | Description |
@@ -54,6 +54,18 @@ The FastAPI server exposes **22 endpoints** across 8 functional groups:
 |---|---|---|
 | `GET` | `/api/v1/sop/routing/{question_type}` | SOP routing for a question type |
 | `GET` | `/api/v1/sop/tone` | BOLDR brand voice tone guidelines |
+
+### Monitoring
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/stats` | Live pipeline statistics (tickets, channels, intents, personas, KB info) |
+
+### Audit Log
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/v1/audit/recent` | Recent ticket processing events (with pagination) |
+| `GET` | `/api/v1/audit/summary` | Audit summary statistics (by channel, intent, persona, avg confidence) |
+| `GET` | `/api/v1/audit/ticket/{ticket_id}` | Full audit record for a specific ticket |
 
 ### Monitoring
 | Method | Endpoint | Description |
@@ -193,6 +205,9 @@ BOLDR/
 │   ├── shopify/              # Shopify product/order lookup (simulated)
 │   │   ├── __init__.py
 │   │   └── product_lookup.py   # Product catalogue, straps, engraving, servicing, orders
+│   ├── audit/                # SQLite-backed audit log
+│   │   ├── __init__.py
+│   │   └── audit_log.py        # Ticket processing log for transparency & auditability
 │   ├── queue/                 # SQLite-backed approval queue
 │   │   ├── __init__.py
 │   │   └── approval_queue.py   # Reply + KB approval queue with persistence
