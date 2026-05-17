@@ -27,6 +27,11 @@ from app.intelligence.theme_clusterer import ThemeClusterer
 from app.generator.reply import ReplyGenerator, KBAutoDrafter
 from app.routing.sop_parser import SOPParser
 from app.routing.channel_router import ChannelRouter
+from app.shopify.product_lookup import lookup_product, ProductLookupResult
+from app.queue.approval_queue import (
+    QueuedReply, enqueue_reply, get_pending_replies, get_all_replies,
+    approve_reply, reject_reply, enqueue_kb_entry, get_pending_kb_entries, approve_kb_entry,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -151,6 +156,22 @@ class KBEntryApproval(BaseModel):
     approved: bool = True
 
 
+class ShopifyLookupRequest(BaseModel):
+    """Request for Shopify product/order lookup."""
+    query: str = Field(..., description="Product name, SKU, order ID, or keyword to search")
+
+
+class ShopifyLookupResponse(BaseModel):
+    """Response from Shopify product/order lookup."""
+    found: bool
+    product: Optional[dict] = None
+    straps: Optional[dict] = None
+    engraving: Optional[dict] = None
+    servicing: Optional[dict] = None
+    order: Optional[dict] = None
+    message: str
+
+
 # --- API Endpoints ---
 
 @app.get("/api/v1/health")
@@ -225,6 +246,24 @@ async def process_intake(message: IntakeMessage):
             channel=message.channel,
             confidence=best_score,
         )
+
+    # Enqueue reply for human approval (SQLite persistence)
+    if reply_data:
+        queued_reply = QueuedReply(
+            ticket_id=classification.ticket_id,
+            question_type=intent_result.question_type,
+            persona=persona_result.persona,
+            channel=message.channel,
+            customer_name=message.sender_name or "there",
+            subject=message.subject,
+            original_message=message.message,
+            draft_reply=reply_data.get("reply", "") if isinstance(reply_data, dict) else str(reply_data),
+            confidence=best_score,
+            is_answerable=answerability in (AnswerabilityResult.ANSWERABLE, AnswerabilityResult.NEEDS_SHOPIFY),
+            sop_routing=sop_routing["source"] if sop_routing else "N/A",
+            needs_shopify=sop_parser.requires_shopify(intent_result.question_type),
+        )
+        enqueue_reply(queued_reply)
 
     # Update pipeline statistics
     pipeline_stats["total_tickets"] += 1
@@ -341,6 +380,112 @@ async def auto_draft_kb(question: str, answer: str, theme: str, persona: str):
         persona=persona,
     )
     return entry
+
+
+@app.get("/api/v1/shopify/lookup")
+async def shopify_lookup(query: str):
+    """Look up a product, strap, engraving, servicing, or order by keyword.
+
+    In production, this would call the Shopify Storefront API.
+    For the competition, this simulates with KB product data.
+    """
+    result = lookup_product(query)
+    return {
+        "found": result.found,
+        "product": result.product,
+        "straps": result.straps,
+        "engraving": result.engraving,
+        "servicing": result.servicing,
+        "order": result.order,
+        "message": result.message,
+    }
+
+
+@app.get("/api/v1/shopify/order/{order_id}")
+async def shopify_order_lookup(order_id: str):
+    """Look up an order by order ID.
+
+    In production, this would call the Shopify Orders API.
+    For the competition, this simulates with sample order data.
+    """
+    result = lookup_product(order_id)
+    if result.order:
+        return {"order_id": order_id, **result.order}
+    raise HTTPException(status_code=404, detail=f"Order not found: {order_id}")
+
+
+@app.get("/api/v1/shopify/products")
+async def shopify_products():
+    """List all BOLDR products with pricing and availability."""
+    from app.shopify.product_lookup import PRODUCTS, STRAPS
+    return {"products": PRODUCTS, "straps": STRAPS}
+
+
+# --- Approval Queue Endpoints ---
+
+@app.get("/api/v1/queue/replies")
+async def get_reply_queue(status: Optional[str] = None):
+    """Get all queued replies, optionally filtered by status."""
+    if status and status not in ("pending", "approved", "rejected", "edited"):
+        raise HTTPException(status_code=400, detail=f"Invalid status: {status}. Must be pending, approved, rejected, or edited.")
+    return {"replies": get_all_replies(status=status)}
+
+
+@app.get("/api/v1/queue/replies/pending")
+async def get_pending_reply_queue():
+    """Get all pending replies awaiting human approval."""
+    return {"replies": get_pending_replies()}
+
+
+@app.post("/api/v1/queue/replies/{ticket_id}/approve")
+async def approve_queued_reply(ticket_id: str, approved_by: str = ""):
+    """Approve a queued reply for sending."""
+    result = approve_reply(ticket_id, approved_by=approved_by)
+    if "error" in result.get("status", ""):
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result
+
+
+@app.post("/api/v1/queue/replies/{ticket_id}/reject")
+async def reject_queued_reply(ticket_id: str, rejected_by: str = ""):
+    """Reject a queued reply."""
+    result = reject_reply(ticket_id, rejected_by=rejected_by)
+    if "error" in result.get("status", ""):
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result
+
+
+@app.get("/api/v1/queue/kb")
+async def get_kb_approval_queue():
+    """Get all pending KB entries awaiting human approval."""
+    return {"entries": get_pending_kb_entries()}
+
+
+@app.post("/api/v1/queue/kb/{entry_id}/approve")
+async def approve_kb_entry_api(entry_id: str, approved_by: str = ""):
+    """Approve an auto-drafted KB entry."""
+    result = approve_kb_entry(entry_id, approved_by=approved_by)
+    if "error" in result.get("status", ""):
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result
+
+
+# --- Scheduled Theme Clustering ---
+
+@app.post("/api/v1/themes/cluster")
+async def trigger_theme_clustering():
+    """Manually trigger theme clustering (for scheduled runs or testing).
+
+    In production, this would be called by a cron job or n8n scheduled trigger.
+    """
+    report = theme_clusterer.get_weekly_theme_report()
+    brief = theme_clusterer.get_monthly_marketing_brief()
+    return {
+        "status": "clustered",
+        "weekly_report": report,
+        "monthly_brief": brief,
+        "note": "In production, this endpoint is called by n8n scheduled trigger or cron job.",
+    }
 
 
 @app.get("/api/v1/sop/routing/{question_type}")

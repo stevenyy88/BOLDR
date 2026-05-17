@@ -66,6 +66,9 @@ credentials/
 *.key
 service-account*.json
 
+# Queue database (SQLite, generated at runtime)
+data/boldr_queue.db
+
 # Test artifacts
 .pytest_cache/
 .coverage

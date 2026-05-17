@@ -129,6 +129,12 @@ BOLDR/
 │   │   ├── reply_drafter.py     # Draft replies in BOLDR brand voice
 │   │   ├── kb_auto_draft.py     # Auto-draft KB entries for gaps
 │   │   └── brand_voice.py       # Brand voice templates from SOP
+│   ├── shopify/              # Shopify product/order lookup (simulated)
+│   │   ├── __init__.py
+│   │   └── product_lookup.py   # Product catalogue, straps, engraving, servicing, orders
+│   ├── queue/                 # SQLite-backed approval queue
+│   │   ├── __init__.py
+│   │   └── approval_queue.py   # Reply + KB approval queue with persistence
 │   ├── intelligence/            # Theme clustering + marketing briefs
 │   │   ├── __init__.py
 │   │   ├── theme_clusterer.py   # Weekly theme clustering
@@ -181,8 +187,9 @@ BOLDR/
 │   ├── architecture.md          # Architecture diagrams and data flow
 │   └── demo_script.md           # 5-minute demo video script
 │
-└── scripts/                     # Utility scripts
+├── scripts/                     # Utility scripts
     ├── index_kb.py              # Index all KB documents into ChromaDB
+    ├── import_workflows.py      # Import n8n workflows via REST API
     ├── test_all_tickets.py      # Run all 70 tickets through the workflow
     ├── generate_gap_log.py      # Generate knowledge gap log output
     └── benchmark_sentiment.py   # External sentiment benchmarking

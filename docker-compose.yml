@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # ChromaDB — Vector store for Knowledge Base
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: boldr_chromadb
+    ports:
+      - "8100:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - CHROMA_HOST=0.0.0.0
+      - CHROMA_PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v2/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # n8n — Workflow orchestration (depends on ChromaDB)
   n8n:
     image: n8nio/n8n:latest
     container_name: boldr_n8n
@@ -25,31 +45,15 @@ services:
       - N8N_API_KEY=BOLDR_n8n_API_KEY_2026
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Asia/Singapore}
     depends_on:
-      - chromadb
+      chromadb:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5678/healthz || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: boldr_chromadb
-    ports:
-      - "8100:8000"
-    volumes:
-      - chroma_data:/chroma/chroma
-    environment:
-      - CHROMA_HOST=0.0.0.0
-      - CHROMA_PORT=8000
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/v2/heartbeat || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      start_period: 60s
 
 volumes:
   n8n_data:
