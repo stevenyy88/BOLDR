@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T05:49:15.997Z",
+  "updatedAt": "2026-05-17T06:36:07.695Z",
   "createdAt": "2026-05-17T00:47:42.450Z",
   "id": "Qj8sWSe9Enz7EH5Q",
   "name": "BOLDR Email Intake",
@@ -11,7 +11,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "email",
-        "responseMode": "responseNode",
+        "responseMode": "lastNode",
         "options": {}
       },
       "name": "Email Webhook",
@@ -26,59 +26,60 @@
     },
     {
       "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
         "assignments": {
           "assignments": [
             {
-              "id": "a1",
+              "id": "n1",
               "name": "message",
-              "value": "={{ $json.text ?? $json.snippet ?? '' }}",
+              "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a2",
+              "id": "n2",
               "name": "channel",
               "value": "email",
               "type": "string"
             },
             {
-              "id": "a3",
+              "id": "n3",
               "name": "sender_id",
-              "value": "={{ $json.from.email }}",
+              "value": "={{ $json.body.sender_id ?? $json.body.from ?? $json.sender_id ?? \"anonymous\" }}",
               "type": "string"
             },
             {
-              "id": "a4",
+              "id": "n4",
               "name": "sender_name",
-              "value": "={{ $json.from.name ?? $json.from.email }}",
+              "value": "={{ $json.body.sender_name ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a5",
+              "id": "n5",
               "name": "timestamp",
-              "value": "={{ $json.internalDate ?? $now.toISO() }}",
+              "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
               "type": "string"
             },
             {
-              "id": "a6",
+              "id": "n6",
               "name": "thread_id",
-              "value": "={{ $json.threadId ?? $json.id }}",
+              "value": "={{ $json.body.thread_id ?? \"TH-\" + $now.format(\"yyyyMMddHHmmss\") }}",
               "type": "string"
             },
             {
-              "id": "a7",
+              "id": "n7",
               "name": "subject",
-              "value": "={{ $json.subject ?? '' }}",
+              "value": "={{ $json.body.subject ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a8",
+              "id": "n8",
               "name": "email_id",
-              "value": "={{ $json.id }}",
+              "value": "={{ $json.body.email_id ?? \"\" }}",
               "type": "string"
             }
           ]
-        },
-        "options": {}
+        }
       },
       "name": "Normalize Email Data",
       "type": "n8n-nodes-base.set",
@@ -117,20 +118,6 @@
       ],
       "notes": "POST normalized email to main BOLDR Intelligence Loop webhook",
       "id": "be808205-f516-42ce-82f4-e77caca0d45e"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "{\"status\":\"received\",\"message\":\"Your email has been received. We'll respond shortly!\"}"
-      },
-      "name": "Respond to Email",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        860,
-        300
-      ],
-      "id": "c9bae790-c379-4efa-9884-ee8089f7f4b8"
     }
   ],
   "connections": {
@@ -155,17 +142,6 @@
           }
         ]
       ]
-    },
-    "Forward to Intelligence Loop": {
-      "main": [
-        [
-          {
-            "node": "Respond to Email",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -174,9 +150,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "d0954080-542d-4b21-8e89-81137034b605",
-  "activeVersionId": "d0954080-542d-4b21-8e89-81137034b605",
-  "versionCounter": 7,
+  "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
+  "activeVersionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
+  "versionCounter": 22,
   "triggerCount": 1,
   "shared": [
     {
@@ -199,16 +175,16 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:49:15.998Z",
-    "createdAt": "2026-05-17T05:49:15.998Z",
-    "versionId": "d0954080-542d-4b21-8e89-81137034b605",
+    "updatedAt": "2026-05-17T06:36:07.695Z",
+    "createdAt": "2026-05-17T06:36:07.695Z",
+    "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
     "workflowId": "Qj8sWSe9Enz7EH5Q",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
           "path": "email",
-          "responseMode": "responseNode",
+          "responseMode": "lastNode",
           "options": {}
         },
         "name": "Email Webhook",
@@ -223,59 +199,60 @@
       },
       {
         "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
-                "id": "a1",
+                "id": "n1",
                 "name": "message",
-                "value": "={{ $json.text ?? $json.snippet ?? '' }}",
+                "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a2",
+                "id": "n2",
                 "name": "channel",
                 "value": "email",
                 "type": "string"
               },
               {
-                "id": "a3",
+                "id": "n3",
                 "name": "sender_id",
-                "value": "={{ $json.from.email }}",
+                "value": "={{ $json.body.sender_id ?? $json.body.from ?? $json.sender_id ?? \"anonymous\" }}",
                 "type": "string"
               },
               {
-                "id": "a4",
+                "id": "n4",
                 "name": "sender_name",
-                "value": "={{ $json.from.name ?? $json.from.email }}",
+                "value": "={{ $json.body.sender_name ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a5",
+                "id": "n5",
                 "name": "timestamp",
-                "value": "={{ $json.internalDate ?? $now.toISO() }}",
+                "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
                 "type": "string"
               },
               {
-                "id": "a6",
+                "id": "n6",
                 "name": "thread_id",
-                "value": "={{ $json.threadId ?? $json.id }}",
+                "value": "={{ $json.body.thread_id ?? \"TH-\" + $now.format(\"yyyyMMddHHmmss\") }}",
                 "type": "string"
               },
               {
-                "id": "a7",
+                "id": "n7",
                 "name": "subject",
-                "value": "={{ $json.subject ?? '' }}",
+                "value": "={{ $json.body.subject ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a8",
+                "id": "n8",
                 "name": "email_id",
-                "value": "={{ $json.id }}",
+                "value": "={{ $json.body.email_id ?? \"\" }}",
                 "type": "string"
               }
             ]
-          },
-          "options": {}
+          }
         },
         "name": "Normalize Email Data",
         "type": "n8n-nodes-base.set",
@@ -314,20 +291,6 @@
         ],
         "notes": "POST normalized email to main BOLDR Intelligence Loop webhook",
         "id": "be808205-f516-42ce-82f4-e77caca0d45e"
-      },
-      {
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "{\"status\":\"received\",\"message\":\"Your email has been received. We'll respond shortly!\"}"
-        },
-        "name": "Respond to Email",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1,
-        "position": [
-          860,
-          300
-        ],
-        "id": "c9bae790-c379-4efa-9884-ee8089f7f4b8"
       }
     ],
     "connections": {
@@ -352,17 +315,6 @@
             }
           ]
         ]
-      },
-      "Forward to Intelligence Loop": {
-        "main": [
-          [
-            {
-              "node": "Respond to Email",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
       }
     },
     "authors": "Steve Ng",
@@ -371,11 +323,35 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:49:21.802Z",
-        "id": 50,
+        "createdAt": "2026-05-17T06:36:07.733Z",
+        "id": 135,
         "workflowId": "Qj8sWSe9Enz7EH5Q",
-        "versionId": "d0954080-542d-4b21-8e89-81137034b605",
+        "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
         "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T06:36:07.781Z",
+        "id": 137,
+        "workflowId": "Qj8sWSe9Enz7EH5Q",
+        "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
+        "event": "activated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T06:36:07.720Z",
+        "id": 134,
+        "workflowId": "Qj8sWSe9Enz7EH5Q",
+        "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
+        "event": "deactivated",
+        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
+      },
+      {
+        "createdAt": "2026-05-17T06:36:07.770Z",
+        "id": 136,
+        "workflowId": "Qj8sWSe9Enz7EH5Q",
+        "versionId": "175a7dbb-b1c5-4d97-9108-8bd206e8bbb2",
+        "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }
     ]

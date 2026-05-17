@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T05:14:10.575Z",
+  "updatedAt": "2026-05-17T06:36:07.546Z",
   "createdAt": "2026-05-17T00:47:42.488Z",
   "id": "LBAM9AM2t14lWrLv",
   "name": "BOLDR Instagram DM Intake",
@@ -11,7 +11,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "instagram-dm",
-        "responseMode": "responseNode",
+        "responseMode": "lastNode",
         "options": {}
       },
       "name": "Instagram DM Webhook",
@@ -27,35 +27,36 @@
     },
     {
       "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
         "assignments": {
           "assignments": [
             {
-              "id": "a1",
+              "id": "n1",
               "name": "channel",
-              "value": "={{ $json.channel ?? 'instagram' }}",
+              "value": "={{ $json.body.channel ?? $json.channel ?? \"instagram\" }}",
               "type": "string"
             },
             {
-              "id": "a2",
+              "id": "n2",
               "name": "customer_id",
-              "value": "={{ $json.customer_id ?? '' }}",
+              "value": "={{ $json.body.sender_id ?? $json.body.username ?? $json.sender_id ?? \"anonymous\" }}",
               "type": "string"
             },
             {
-              "id": "a3",
+              "id": "n3",
               "name": "message",
-              "value": "={{ $json.message ?? '' }}",
+              "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a4",
+              "id": "n4",
               "name": "platform",
-              "value": "={{ $json.metadata.platform ?? 'instagram' }}",
+              "value": "instagram",
               "type": "string"
             }
           ]
-        },
-        "options": {}
+        }
       },
       "name": "Normalize Instagram Data",
       "type": "n8n-nodes-base.set",
@@ -94,20 +95,6 @@
       ],
       "notes": "POST normalized Instagram DM to main BOLDR Intelligence Loop webhook",
       "id": "4be78c1b-37f7-4cee-8e7c-5a9973cff31c"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "{\"status\":\"received\",\"message\":\"Your Instagram message has been received. We'll respond shortly!\"}"
-      },
-      "name": "Respond to Instagram",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        860,
-        300
-      ],
-      "id": "5f5144f0-ec76-4f29-8a55-ead215274e37"
     }
   ],
   "connections": {
@@ -132,17 +119,6 @@
           }
         ]
       ]
-    },
-    "Forward to Intelligence Loop": {
-      "main": [
-        [
-          {
-            "node": "Respond to Instagram",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -151,9 +127,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
-  "activeVersionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
-  "versionCounter": 28,
+  "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
+  "activeVersionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
+  "versionCounter": 43,
   "triggerCount": 1,
   "shared": [
     {
@@ -176,16 +152,16 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:14:10.576Z",
-    "createdAt": "2026-05-17T05:14:10.576Z",
-    "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+    "updatedAt": "2026-05-17T06:36:07.546Z",
+    "createdAt": "2026-05-17T06:36:07.546Z",
+    "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
     "workflowId": "LBAM9AM2t14lWrLv",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
           "path": "instagram-dm",
-          "responseMode": "responseNode",
+          "responseMode": "lastNode",
           "options": {}
         },
         "name": "Instagram DM Webhook",
@@ -201,35 +177,36 @@
       },
       {
         "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
-                "id": "a1",
+                "id": "n1",
                 "name": "channel",
-                "value": "={{ $json.channel ?? 'instagram' }}",
+                "value": "={{ $json.body.channel ?? $json.channel ?? \"instagram\" }}",
                 "type": "string"
               },
               {
-                "id": "a2",
+                "id": "n2",
                 "name": "customer_id",
-                "value": "={{ $json.customer_id ?? '' }}",
+                "value": "={{ $json.body.sender_id ?? $json.body.username ?? $json.sender_id ?? \"anonymous\" }}",
                 "type": "string"
               },
               {
-                "id": "a3",
+                "id": "n3",
                 "name": "message",
-                "value": "={{ $json.message ?? '' }}",
+                "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a4",
+                "id": "n4",
                 "name": "platform",
-                "value": "={{ $json.metadata.platform ?? 'instagram' }}",
+                "value": "instagram",
                 "type": "string"
               }
             ]
-          },
-          "options": {}
+          }
         },
         "name": "Normalize Instagram Data",
         "type": "n8n-nodes-base.set",
@@ -268,20 +245,6 @@
         ],
         "notes": "POST normalized Instagram DM to main BOLDR Intelligence Loop webhook",
         "id": "4be78c1b-37f7-4cee-8e7c-5a9973cff31c"
-      },
-      {
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "{\"status\":\"received\",\"message\":\"Your Instagram message has been received. We'll respond shortly!\"}"
-        },
-        "name": "Respond to Instagram",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1,
-        "position": [
-          860,
-          300
-        ],
-        "id": "5f5144f0-ec76-4f29-8a55-ead215274e37"
       }
     ],
     "connections": {
@@ -306,17 +269,6 @@
             }
           ]
         ]
-      },
-      "Forward to Intelligence Loop": {
-        "main": [
-          [
-            {
-              "node": "Respond to Instagram",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
       }
     },
     "authors": "Steve Ng",
@@ -325,50 +277,34 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:14:10.645Z",
-        "id": 35,
+        "createdAt": "2026-05-17T06:36:07.583Z",
+        "id": 131,
         "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+        "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.214Z",
-        "id": 43,
+        "createdAt": "2026-05-17T06:36:07.631Z",
+        "id": 133,
         "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+        "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:25:01.488Z",
-        "id": 49,
+        "createdAt": "2026-05-17T06:36:07.571Z",
+        "id": 130,
         "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
-        "event": "activated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:14:10.632Z",
-        "id": 34,
-        "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+        "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.204Z",
-        "id": 42,
+        "createdAt": "2026-05-17T06:36:07.620Z",
+        "id": 132,
         "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
-        "event": "deactivated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:25:01.477Z",
-        "id": 48,
-        "workflowId": "LBAM9AM2t14lWrLv",
-        "versionId": "0469f451-9a0b-4bb7-add7-a2147fd89ad6",
+        "versionId": "a33fbed3-e6fa-4a20-ac3c-2b7516e6e1e4",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }

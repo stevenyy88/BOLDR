@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T05:14:10.696Z",
+  "updatedAt": "2026-05-17T06:36:07.322Z",
   "createdAt": "2026-05-17T00:47:42.520Z",
   "id": "9Z1ZC5CMijLlTRiJ",
   "name": "BOLDR WhatsApp Intake",
@@ -11,7 +11,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "whatsapp",
-        "responseMode": "responseNode",
+        "responseMode": "lastNode",
         "options": {}
       },
       "name": "WhatsApp Webhook",
@@ -27,35 +27,36 @@
     },
     {
       "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
         "assignments": {
           "assignments": [
             {
-              "id": "a1",
-              "name": "channel",
-              "value": "={{ $json.channel ?? 'whatsapp' }}",
-              "type": "string"
-            },
-            {
-              "id": "a2",
-              "name": "customer_id",
-              "value": "={{ $json.customer_id ?? '' }}",
-              "type": "string"
-            },
-            {
-              "id": "a3",
+              "id": "n1",
               "name": "message",
-              "value": "={{ $json.message ?? '' }}",
+              "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? $json.text ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a4",
+              "id": "n2",
+              "name": "channel",
+              "value": "={{ $json.body.channel ?? $json.channel ?? \"whatsapp\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n3",
+              "name": "customer_id",
+              "value": "={{ $json.body.sender_id ?? $json.body.from ?? $json.sender_id ?? \"anonymous\" }}",
+              "type": "string"
+            },
+            {
+              "id": "n4",
               "name": "platform",
-              "value": "={{ $json.metadata.platform ?? 'whatsapp' }}",
+              "value": "whatsapp",
               "type": "string"
             }
           ]
-        },
-        "options": {}
+        }
       },
       "name": "Normalize WhatsApp Data",
       "type": "n8n-nodes-base.set",
@@ -94,20 +95,6 @@
       ],
       "notes": "POST normalized WhatsApp message to main BOLDR Intelligence Loop webhook",
       "id": "45a6757a-82a5-4482-ac81-4712cdfaf7a6"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "{\"status\":\"received\",\"message\":\"Your WhatsApp message has been received. We'll respond shortly!\"}"
-      },
-      "name": "Respond to WhatsApp",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        860,
-        300
-      ],
-      "id": "60c9ced8-29c5-4c1f-8a58-2246390f58d1"
     }
   ],
   "connections": {
@@ -132,17 +119,6 @@
           }
         ]
       ]
-    },
-    "Forward to Intelligence Loop": {
-      "main": [
-        [
-          {
-            "node": "Respond to WhatsApp",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -151,9 +127,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-  "activeVersionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-  "versionCounter": 28,
+  "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
+  "activeVersionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
+  "versionCounter": 43,
   "triggerCount": 1,
   "shared": [
     {
@@ -176,16 +152,16 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:14:10.697Z",
-    "createdAt": "2026-05-17T05:14:10.697Z",
-    "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+    "updatedAt": "2026-05-17T06:36:07.325Z",
+    "createdAt": "2026-05-17T06:36:07.325Z",
+    "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
     "workflowId": "9Z1ZC5CMijLlTRiJ",
     "nodes": [
       {
         "parameters": {
           "httpMethod": "POST",
           "path": "whatsapp",
-          "responseMode": "responseNode",
+          "responseMode": "lastNode",
           "options": {}
         },
         "name": "WhatsApp Webhook",
@@ -201,35 +177,36 @@
       },
       {
         "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
-                "id": "a1",
-                "name": "channel",
-                "value": "={{ $json.channel ?? 'whatsapp' }}",
-                "type": "string"
-              },
-              {
-                "id": "a2",
-                "name": "customer_id",
-                "value": "={{ $json.customer_id ?? '' }}",
-                "type": "string"
-              },
-              {
-                "id": "a3",
+                "id": "n1",
                 "name": "message",
-                "value": "={{ $json.message ?? '' }}",
+                "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? $json.text ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a4",
+                "id": "n2",
+                "name": "channel",
+                "value": "={{ $json.body.channel ?? $json.channel ?? \"whatsapp\" }}",
+                "type": "string"
+              },
+              {
+                "id": "n3",
+                "name": "customer_id",
+                "value": "={{ $json.body.sender_id ?? $json.body.from ?? $json.sender_id ?? \"anonymous\" }}",
+                "type": "string"
+              },
+              {
+                "id": "n4",
                 "name": "platform",
-                "value": "={{ $json.metadata.platform ?? 'whatsapp' }}",
+                "value": "whatsapp",
                 "type": "string"
               }
             ]
-          },
-          "options": {}
+          }
         },
         "name": "Normalize WhatsApp Data",
         "type": "n8n-nodes-base.set",
@@ -268,20 +245,6 @@
         ],
         "notes": "POST normalized WhatsApp message to main BOLDR Intelligence Loop webhook",
         "id": "45a6757a-82a5-4482-ac81-4712cdfaf7a6"
-      },
-      {
-        "parameters": {
-          "respondWith": "json",
-          "responseBody": "{\"status\":\"received\",\"message\":\"Your WhatsApp message has been received. We'll respond shortly!\"}"
-        },
-        "name": "Respond to WhatsApp",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1,
-        "position": [
-          860,
-          300
-        ],
-        "id": "60c9ced8-29c5-4c1f-8a58-2246390f58d1"
       }
     ],
     "connections": {
@@ -306,17 +269,6 @@
             }
           ]
         ]
-      },
-      "Forward to Intelligence Loop": {
-        "main": [
-          [
-            {
-              "node": "Respond to WhatsApp",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
       }
     },
     "authors": "Steve Ng",
@@ -325,50 +277,34 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:14:10.736Z",
-        "id": 37,
+        "createdAt": "2026-05-17T06:36:07.388Z",
+        "id": 127,
         "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.163Z",
-        "id": 41,
+        "createdAt": "2026-05-17T06:36:07.460Z",
+        "id": 129,
         "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:25:01.439Z",
-        "id": 47,
+        "createdAt": "2026-05-17T06:36:07.369Z",
+        "id": 126,
         "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-        "event": "activated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:14:10.722Z",
-        "id": 36,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.153Z",
-        "id": 40,
+        "createdAt": "2026-05-17T06:36:07.443Z",
+        "id": 128,
         "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
-        "event": "deactivated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:25:01.425Z",
-        "id": 46,
-        "workflowId": "9Z1ZC5CMijLlTRiJ",
-        "versionId": "4011ce3d-efbb-4df5-b5fc-ca2b3f8988f1",
+        "versionId": "3bcf00d9-406e-4fa3-8996-11b9118358de",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }

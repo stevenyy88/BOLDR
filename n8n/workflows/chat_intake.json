@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T05:14:10.276Z",
+  "updatedAt": "2026-05-17T06:34:19.596Z",
   "createdAt": "2026-05-17T00:47:42.305Z",
   "id": "shrn8Mr1CIIAitjI",
   "name": "BOLDR Chat Intake",
@@ -27,53 +27,54 @@
     },
     {
       "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
         "assignments": {
           "assignments": [
             {
-              "id": "a1",
+              "id": "n1",
               "name": "message",
-              "value": "={{ $json.body.message ?? $json.body.text ?? '' }}",
+              "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a2",
+              "id": "n2",
               "name": "channel",
-              "value": "={{ $json.body.channel ?? 'chat' }}",
+              "value": "={{ $json.body.channel ?? $json.channel ?? \"chat\" }}",
               "type": "string"
             },
             {
-              "id": "a3",
+              "id": "n3",
               "name": "sender_id",
-              "value": "={{ $json.body.sender_id ?? $json.body.user_id ?? '' }}",
+              "value": "={{ $json.body.sender_id ?? $json.sender_id ?? \"anonymous\" }}",
               "type": "string"
             },
             {
-              "id": "a4",
+              "id": "n4",
               "name": "sender_name",
-              "value": "={{ $json.body.sender_name ?? $json.body.user_name ?? 'anonymous' }}",
+              "value": "={{ $json.body.sender_name ?? \"\" }}",
               "type": "string"
             },
             {
-              "id": "a5",
+              "id": "n5",
               "name": "timestamp",
               "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
               "type": "string"
             },
             {
-              "id": "a6",
+              "id": "n6",
               "name": "thread_id",
-              "value": "={{ $json.body.thread_id ?? $json.body.session_id ?? '' }}",
+              "value": "={{ $json.body.thread_id ?? \"TH-\" + $now.format(\"yyyyMMddHHmmss\") }}",
               "type": "string"
             },
             {
-              "id": "a7",
+              "id": "n7",
               "name": "source_id",
-              "value": "={{ $json.body.message_id ?? '' }}",
+              "value": "={{ $json.body.source_id ?? \"\" }}",
               "type": "string"
             }
           ]
-        },
-        "options": {}
+        }
       },
       "name": "Normalize Chat Data",
       "type": "n8n-nodes-base.set",
@@ -116,7 +117,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"status\": \"received\",\n  \"message\": \"Your message has been received. We'll respond shortly!\"\n}",
+        "responseBody": "={\n  \"status\": \"received\",\n  \"ticket_id\": \"{{ $json.ticket_id }}\",\n  \"message\": \"Thank you for reaching out to BOLDR. Our team has received your message and will respond within 24 hours.\"\n}",
         "options": {}
       },
       "name": "Respond to Chat Widget",
@@ -171,9 +172,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
-  "activeVersionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
-  "versionCounter": 18,
+  "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
+  "activeVersionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
+  "versionCounter": 28,
   "triggerCount": 1,
   "shared": [
     {
@@ -196,9 +197,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:14:10.280Z",
-    "createdAt": "2026-05-17T05:14:10.280Z",
-    "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+    "updatedAt": "2026-05-17T06:34:19.597Z",
+    "createdAt": "2026-05-17T06:34:19.597Z",
+    "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
     "workflowId": "shrn8Mr1CIIAitjI",
     "nodes": [
       {
@@ -221,53 +222,54 @@
       },
       {
         "parameters": {
+          "mode": "manual",
+          "duplicateItem": false,
           "assignments": {
             "assignments": [
               {
-                "id": "a1",
+                "id": "n1",
                 "name": "message",
-                "value": "={{ $json.body.message ?? $json.body.text ?? '' }}",
+                "value": "={{ $json.body.message ?? $json.body.text ?? $json.message ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a2",
+                "id": "n2",
                 "name": "channel",
-                "value": "={{ $json.body.channel ?? 'chat' }}",
+                "value": "={{ $json.body.channel ?? $json.channel ?? \"chat\" }}",
                 "type": "string"
               },
               {
-                "id": "a3",
+                "id": "n3",
                 "name": "sender_id",
-                "value": "={{ $json.body.sender_id ?? $json.body.user_id ?? '' }}",
+                "value": "={{ $json.body.sender_id ?? $json.sender_id ?? \"anonymous\" }}",
                 "type": "string"
               },
               {
-                "id": "a4",
+                "id": "n4",
                 "name": "sender_name",
-                "value": "={{ $json.body.sender_name ?? $json.body.user_name ?? 'anonymous' }}",
+                "value": "={{ $json.body.sender_name ?? \"\" }}",
                 "type": "string"
               },
               {
-                "id": "a5",
+                "id": "n5",
                 "name": "timestamp",
                 "value": "={{ $json.body.timestamp ?? $now.toISO() }}",
                 "type": "string"
               },
               {
-                "id": "a6",
+                "id": "n6",
                 "name": "thread_id",
-                "value": "={{ $json.body.thread_id ?? $json.body.session_id ?? '' }}",
+                "value": "={{ $json.body.thread_id ?? \"TH-\" + $now.format(\"yyyyMMddHHmmss\") }}",
                 "type": "string"
               },
               {
-                "id": "a7",
+                "id": "n7",
                 "name": "source_id",
-                "value": "={{ $json.body.message_id ?? '' }}",
+                "value": "={{ $json.body.source_id ?? \"\" }}",
                 "type": "string"
               }
             ]
-          },
-          "options": {}
+          }
         },
         "name": "Normalize Chat Data",
         "type": "n8n-nodes-base.set",
@@ -310,7 +312,7 @@
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={\n  \"status\": \"received\",\n  \"message\": \"Your message has been received. We'll respond shortly!\"\n}",
+          "responseBody": "={\n  \"status\": \"received\",\n  \"ticket_id\": \"{{ $json.ticket_id }}\",\n  \"message\": \"Thank you for reaching out to BOLDR. Our team has received your message and will respond within 24 hours.\"\n}",
           "options": {}
         },
         "name": "Respond to Chat Widget",
@@ -365,50 +367,34 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:14:10.350Z",
-        "id": 33,
+        "createdAt": "2026-05-17T06:34:19.630Z",
+        "id": 123,
         "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.104Z",
-        "id": 39,
+        "createdAt": "2026-05-17T06:34:19.673Z",
+        "id": 125,
         "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:25:01.384Z",
-        "id": 45,
+        "createdAt": "2026-05-17T06:34:19.619Z",
+        "id": 122,
         "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
-        "event": "activated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:14:10.332Z",
-        "id": 32,
-        "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:14:11.094Z",
-        "id": 38,
+        "createdAt": "2026-05-17T06:34:19.664Z",
+        "id": 124,
         "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
-        "event": "deactivated",
-        "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
-      },
-      {
-        "createdAt": "2026-05-17T05:25:01.368Z",
-        "id": 44,
-        "workflowId": "shrn8Mr1CIIAitjI",
-        "versionId": "bd061fcc-75a1-44d3-82c3-8d0cba831d00",
+        "versionId": "75d586c2-0d87-4dce-b75b-8b35b200afae",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }

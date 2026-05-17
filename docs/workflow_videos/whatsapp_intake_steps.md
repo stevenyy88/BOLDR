@@ -32,11 +32,12 @@ curl -X POST http://192.168.1.85:5678/webhook/whatsapp \
 ---
 *Author: Steve Ng, Founder & CEO — Digital Futures Consultancy LLP (T17LL1937H) • DigitalFutures.Asia*
 
+
 ## Execution Demo Video
 
 📹 `whatsapp_intake_execution_demo.mp4` — Step-by-step execution walkthrough showing real data flowing through each node.
 
-### Real Test Results
+### Live Test Results
 
 **Input Message:** `My BOLDR Expedition is not keeping time accurately`
 
@@ -59,7 +60,17 @@ curl -X POST http://192.168.1.85:5678/webhook/whatsapp \
 **Final Response:**
 ```json
 {
-  "status": "received",
-  "message": "Your WhatsApp message has been received. We'll respond shortly!"
+  "ticket_id": "TKT-76701",
+  "question_type": "servicing",
+  "buyer_persona": "owner_aftercare",
+  "confidence": 0.95,
+  "is_answerable": false,
+  "answerability_type": "no",
+  "escalation_required": false,
+  "escalation_reason": null,
+  "sop_routing": "Servicing Rate Card",
+  "needs_shopify": false
 }
 ```
+
+**Key Insight:** The response message uses professional BOLDR brand voice — no exclamation marks, courteous and clear.

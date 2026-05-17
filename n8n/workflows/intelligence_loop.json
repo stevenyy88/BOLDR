@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T05:59:17.446Z",
+  "updatedAt": "2026-05-17T06:32:43.568Z",
   "createdAt": "2026-05-17T05:54:02.418Z",
   "id": "yVSeNPXbrkKpc2U9",
   "name": "BOLDR Intelligence Loop",
@@ -183,7 +183,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $('Process via Intelligence Engine').item.json.is_answerable }},\n  \"message\": \"Your message has been processed. We'll get back to you shortly!\"\n}",
+        "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $(\"Process via Intelligence Engine\").item.json.ticket_id }}\",\n  \"question_type\": \"{{ $(\"Process via Intelligence Engine\").item.json.question_type }}\",\n  \"persona\": \"{{ $(\"Process via Intelligence Engine\").item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $(\"Process via Intelligence Engine\").item.json.is_answerable }},\n  \"message\": \"Thank you for reaching out to BOLDR. Your message has been processed and our team will follow up within 24 hours.\"\n}",
         "options": {}
       },
       "name": "Send Response",
@@ -270,9 +270,9 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
-  "activeVersionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
-  "versionCounter": 51,
+  "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
+  "activeVersionId": "dfea0324-aebd-446c-b462-1601f6f84893",
+  "versionCounter": 56,
   "triggerCount": 1,
   "shared": [
     {
@@ -295,9 +295,9 @@
   ],
   "tags": [],
   "activeVersion": {
-    "updatedAt": "2026-05-17T05:59:17.448Z",
-    "createdAt": "2026-05-17T05:59:17.448Z",
-    "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+    "updatedAt": "2026-05-17T06:32:43.569Z",
+    "createdAt": "2026-05-17T06:32:43.569Z",
+    "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
     "workflowId": "yVSeNPXbrkKpc2U9",
     "nodes": [
       {
@@ -476,7 +476,7 @@
       {
         "parameters": {
           "respondWith": "json",
-          "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $('Process via Intelligence Engine').item.json.ticket_id }}\",\n  \"question_type\": \"{{ $('Process via Intelligence Engine').item.json.question_type }}\",\n  \"persona\": \"{{ $('Process via Intelligence Engine').item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $('Process via Intelligence Engine').item.json.is_answerable }},\n  \"message\": \"Your message has been processed. We'll get back to you shortly!\"\n}",
+          "responseBody": "={\n  \"status\": \"processed\",\n  \"ticket_id\": \"{{ $(\"Process via Intelligence Engine\").item.json.ticket_id }}\",\n  \"question_type\": \"{{ $(\"Process via Intelligence Engine\").item.json.question_type }}\",\n  \"persona\": \"{{ $(\"Process via Intelligence Engine\").item.json.buyer_persona }}\",\n  \"is_answerable\": {{ $(\"Process via Intelligence Engine\").item.json.is_answerable }},\n  \"message\": \"Thank you for reaching out to BOLDR. Your message has been processed and our team will follow up within 24 hours.\"\n}",
           "options": {}
         },
         "name": "Send Response",
@@ -563,34 +563,34 @@
     "autosaved": false,
     "workflowPublishHistory": [
       {
-        "createdAt": "2026-05-17T05:59:17.534Z",
-        "id": 87,
+        "createdAt": "2026-05-17T06:32:43.604Z",
+        "id": 107,
         "workflowId": "yVSeNPXbrkKpc2U9",
-        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:59:17.607Z",
-        "id": 89,
+        "createdAt": "2026-05-17T06:32:43.661Z",
+        "id": 109,
         "workflowId": "yVSeNPXbrkKpc2U9",
-        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
         "event": "activated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:59:17.512Z",
-        "id": 86,
+        "createdAt": "2026-05-17T06:32:43.592Z",
+        "id": 106,
         "workflowId": "yVSeNPXbrkKpc2U9",
-        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       },
       {
-        "createdAt": "2026-05-17T05:59:17.592Z",
-        "id": 88,
+        "createdAt": "2026-05-17T06:32:43.645Z",
+        "id": 108,
         "workflowId": "yVSeNPXbrkKpc2U9",
-        "versionId": "9d6751f7-3046-46bb-8957-ac74846828b0",
+        "versionId": "dfea0324-aebd-446c-b462-1601f6f84893",
         "event": "deactivated",
         "userId": "02d126bc-281a-4c4f-b362-60fad368ae64"
       }

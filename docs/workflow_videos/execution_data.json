@@ -8,7 +8,8 @@
     },
     "webhook_response": {
       "status": "received",
-      "message": "Your message has been received. We'll respond shortly!"
+      "ticket_id": "TKT-61834",
+      "message": "Thank you for reaching out to BOLDR. Our team has received your message and will respond within 24 hours."
     },
     "intent": {
       "ticket_id": "TKT-61834",
@@ -28,11 +29,11 @@
           "id": "faq_general_32",
           "content": "FAQ (General)\nQ: Do you offer bulk/corporate pricing?\nA: Yes. For orders of 10 or more watches,",
           "metadata": {
-            "answer": "Yes. For orders of 10 or more watches,",
             "category": "faq",
-            "source_file": "faq_document",
+            "answer": "Yes. For orders of 10 or more watches,",
             "section": "faq_general",
-            "question": "Do you offer bulk/corporate pricing?"
+            "question": "Do you offer bulk/corporate pricing?",
+            "source_file": "faq_document"
           },
           "distance": 0.45532912,
           "confidence": 0.54467088
@@ -41,11 +42,11 @@
           "id": "faq_watch_servicing_19",
           "content": "FAQ (Watch Servicing)\nQ: How much does a battery replacement cost?\nA: SGD 35, with a 3\u20135 business day",
           "metadata": {
+            "source_file": "faq_document",
+            "category": "faq",
             "answer": "SGD 35, with a 3\u20135 business day",
             "question": "How much does a battery replacement cost?",
-            "category": "faq",
-            "section": "faq_watch_servicing",
-            "source_file": "faq_document"
+            "section": "faq_watch_servicing"
           },
           "distance": 0.48674506,
           "confidence": 0.5132549399999999
@@ -54,11 +55,11 @@
           "id": "faq_general_29",
           "content": "FAQ (General)\nQ: What is the warranty on Boldr watches?\nA: All Boldr watches come with a 2-year",
           "metadata": {
-            "category": "faq",
             "section": "faq_general",
+            "category": "faq",
             "source_file": "faq_document",
-            "answer": "All Boldr watches come with a 2-year",
-            "question": "What is the warranty on Boldr watches?"
+            "question": "What is the warranty on Boldr watches?",
+            "answer": "All Boldr watches come with a 2-year"
           },
           "distance": 0.5118364,
           "confidence": 0.48816360000000003
@@ -68,11 +69,11 @@
         "id": "faq_general_32",
         "content": "FAQ (General)\nQ: Do you offer bulk/corporate pricing?\nA: Yes. For orders of 10 or more watches,",
         "metadata": {
-          "answer": "Yes. For orders of 10 or more watches,",
           "category": "faq",
-          "source_file": "faq_document",
+          "answer": "Yes. For orders of 10 or more watches,",
           "section": "faq_general",
-          "question": "Do you offer bulk/corporate pricing?"
+          "question": "Do you offer bulk/corporate pricing?",
+          "source_file": "faq_document"
         },
         "distance": 0.45532912,
         "confidence": 0.54467088
@@ -100,12 +101,19 @@
     "input": {
       "message": "My BOLDR Expedition is not keeping time accurately",
       "sender_id": "whatsapp_user_002",
-      "channel": "whatsapp",
-      "from": "+6591234567"
+      "channel": "whatsapp"
     },
     "webhook_response": {
-      "status": "received",
-      "message": "Your WhatsApp message has been received. We'll respond shortly!"
+      "ticket_id": "TKT-76701",
+      "question_type": "servicing",
+      "buyer_persona": "owner_aftercare",
+      "confidence": 0.95,
+      "is_answerable": false,
+      "answerability_type": "no",
+      "escalation_required": false,
+      "escalation_reason": null,
+      "sop_routing": "Servicing Rate Card",
+      "needs_shopify": false
     },
     "intent": {
       "ticket_id": "TKT-76701",
@@ -125,14 +133,14 @@
           "id": "servicing_international_service_shipping_surcharge_",
           "content": "BOLDR Servicing: International Service (shipping surcharge)\nPrice: SGD 25\nTurnaround: Add 7\u201314 days\nIncludes: Insured return shipping\nNotes: Customer pays inbound shipping; Boldr covers return",
           "metadata": {
-            "service_tier": "International Service (shipping surcharge)",
             "source_file": "rate_card_servicing",
-            "section": "servicing_pricing",
+            "service_tier": "International Service (shipping surcharge)",
             "category": "servicing",
+            "section": "servicing_pricing",
             "turnaround": "Add 7\u201314 days",
             "includes": "Insured return shipping",
-            "price_sgd": 25.0,
-            "notes": "Customer pays inbound shipping; Boldr covers return"
+            "notes": "Customer pays inbound shipping; Boldr covers return",
+            "price_sgd": 25.0
           },
           "distance": 0.62717175,
           "confidence": 0.37282824999999997
@@ -141,11 +149,11 @@
           "id": "faq_watch_servicing_21",
           "content": "FAQ (Watch Servicing)\nQ: My watch is losing time. What service do I need?\nA: If your watch is losing or",
           "metadata": {
-            "category": "faq",
             "question": "My watch is losing time. What service do I need?",
             "source_file": "faq_document",
+            "section": "faq_watch_servicing",
             "answer": "If your watch is losing or",
-            "section": "faq_watch_servicing"
+            "category": "faq"
           },
           "distance": 0.62783295,
           "confidence": 0.37216705000000005
@@ -154,12 +162,12 @@
           "id": "engraving_rush_engraving_same_day_processing_",
           "content": "BOLDR Engraving Service: Rush engraving (same-day processing)\nPrice: SGD 20.0\nNotes: Order must be placed before 12pm SGT; subject to availability",
           "metadata": {
-            "section": "engraving_pricing",
             "service": "Rush engraving (same-day processing)",
-            "source_file": "rate_card_engraving",
-            "category": "engraving",
+            "notes": "Order must be placed before 12pm SGT; subject to availability",
             "price_sgd": 20.0,
-            "notes": "Order must be placed before 12pm SGT; subject to availability"
+            "category": "engraving",
+            "source_file": "rate_card_engraving",
+            "section": "engraving_pricing"
           },
           "distance": 0.66403747,
           "confidence": 0.33596253
@@ -169,14 +177,14 @@
         "id": "servicing_international_service_shipping_surcharge_",
         "content": "BOLDR Servicing: International Service (shipping surcharge)\nPrice: SGD 25\nTurnaround: Add 7\u201314 days\nIncludes: Insured return shipping\nNotes: Customer pays inbound shipping; Boldr covers return",
         "metadata": {
-          "service_tier": "International Service (shipping surcharge)",
           "source_file": "rate_card_servicing",
-          "section": "servicing_pricing",
+          "service_tier": "International Service (shipping surcharge)",
           "category": "servicing",
+          "section": "servicing_pricing",
           "turnaround": "Add 7\u201314 days",
           "includes": "Insured return shipping",
-          "price_sgd": 25.0,
-          "notes": "Customer pays inbound shipping; Boldr covers return"
+          "notes": "Customer pays inbound shipping; Boldr covers return",
+          "price_sgd": 25.0
         },
         "distance": 0.62717175,
         "confidence": 0.37282824999999997
@@ -204,12 +212,19 @@
     "input": {
       "message": "Do you offer engraving services?",
       "sender_id": "ig_user_003",
-      "channel": "instagram",
-      "username": "watch_collector_sg"
+      "channel": "instagram"
     },
     "webhook_response": {
-      "status": "received",
-      "message": "Your Instagram message has been received. We'll respond shortly!"
+      "ticket_id": "TKT-25129",
+      "question_type": "engraving",
+      "buyer_persona": "gifter",
+      "confidence": 1,
+      "is_answerable": true,
+      "answerability_type": "yes",
+      "escalation_required": false,
+      "escalation_reason": null,
+      "sop_routing": "Engraving Rate Card",
+      "needs_shopify": false
     },
     "intent": {
       "ticket_id": "TKT-25129",
@@ -230,8 +245,8 @@
           "content": "FAQ (Engraving)\nQ: Can I get the caseback engraved?\nA: Yes. We offer caseback engraving in",
           "metadata": {
             "category": "faq",
-            "source_file": "faq_document",
             "answer": "Yes. We offer caseback engraving in",
+            "source_file": "faq_document",
             "question": "Can I get the caseback engraved?",
             "section": "faq_engraving"
           },
@@ -242,12 +257,12 @@
           "id": "engraving_caseback_engraving_up_to_20_characters",
           "content": "BOLDR Engraving Service: Caseback engraving \u2014 up to 20 characters\nPrice: SGD 25.0\nNotes: Standard Roman/Latin script only",
           "metadata": {
-            "price_sgd": 25.0,
-            "service": "Caseback engraving \u2014 up to 20 characters",
-            "category": "engraving",
+            "notes": "Standard Roman/Latin script only",
             "source_file": "rate_card_engraving",
-            "section": "engraving_pricing",
-            "notes": "Standard Roman/Latin script only"
+            "price_sgd": 25.0,
+            "category": "engraving",
+            "service": "Caseback engraving \u2014 up to 20 characters",
+            "section": "engraving_pricing"
           },
           "distance": 0.36933792,
           "confidence": 0.63066208
@@ -256,11 +271,11 @@
           "id": "sop_enquiry_4_2_engraving",
           "content": "CS SOP \u2014 Enquiry Type: 4.2 Engraving\nExamples: Can I engrave a message? How many characters? What fonts? Can I change my engraving after ordering?\nWhat to do: Use the Engraving Rate Card. Key things to remember:\nStandard text engraving: up to 40 characters including spaces\nPricing: SGD 25 for up to 20 chars, SGD 35 for 21-40 chars\nIf the customer wants to change/cancel an engraving AFTER ordering:\nWithin 1 hour of order: amend for free \u2014 update the order note in Shopify\n1-24 hours after order: SGD 15 amendment fee \u2014 check with team before confirming\nAfter production has started: not possible \u2014 let customer know politely\nLogo or custom artwork: flag for team review, ask customer to send vector file\n\u26a0 Engraved items cannot be returned unless there is a manufacturing defect. Remind customers to double-check spelling before confirming.",
           "metadata": {
-            "type": "enquiry_handling",
-            "section": "enquiry_4_2_engraving",
-            "source_file": "cs_sop",
             "subsection_title": "Engraving",
-            "category": "sop_enquiry"
+            "source_file": "cs_sop",
+            "type": "enquiry_handling",
+            "category": "sop_enquiry",
+            "section": "enquiry_4_2_engraving"
           },
           "distance": 0.36985666,
           "confidence": 0.63014334
@@ -271,8 +286,8 @@
         "content": "FAQ (Engraving)\nQ: Can I get the caseback engraved?\nA: Yes. We offer caseback engraving in",
         "metadata": {
           "category": "faq",
-          "source_file": "faq_document",
           "answer": "Yes. We offer caseback engraving in",
+          "source_file": "faq_document",
           "question": "Can I get the caseback engraved?",
           "section": "faq_engraving"
         },
@@ -303,11 +318,19 @@
       "message": "I need a warranty claim for my BOLDR Odyssey",
       "sender_id": "email_user_004",
       "channel": "email",
-      "from": "customer@example.com",
       "subject": "Warranty Claim"
     },
     "webhook_response": {
-      "raw": ""
+      "ticket_id": "TKT-83517",
+      "question_type": "servicing",
+      "buyer_persona": "owner_aftercare",
+      "confidence": 0.95,
+      "is_answerable": false,
+      "answerability_type": "no",
+      "escalation_required": false,
+      "escalation_reason": null,
+      "sop_routing": "Servicing Rate Card",
+      "needs_shopify": false
     },
     "intent": {
       "ticket_id": "TKT-83517",
@@ -327,14 +350,14 @@
           "id": "servicing_full_service_premium",
           "content": "BOLDR Servicing: Full Service \u2014 Premium\nPrice: SGD 220\nTurnaround: 14\u201321\nIncludes: All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn\nNotes: Includes 12-month service warranty",
           "metadata": {
-            "category": "servicing",
-            "notes": "Includes 12-month service warranty",
-            "source_file": "rate_card_servicing",
-            "section": "servicing_pricing",
             "turnaround": "14\u201321",
-            "service_tier": "Full Service \u2014 Premium",
             "price_sgd": 220.0,
-            "includes": "All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn"
+            "source_file": "rate_card_servicing",
+            "service_tier": "Full Service \u2014 Premium",
+            "category": "servicing",
+            "includes": "All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn",
+            "notes": "Includes 12-month service warranty",
+            "section": "servicing_pricing"
           },
           "distance": 0.50588214,
           "confidence": 0.49411786
@@ -343,14 +366,14 @@
           "id": "servicing_international_service_shipping_surcharge_",
           "content": "BOLDR Servicing: International Service (shipping surcharge)\nPrice: SGD 25\nTurnaround: Add 7\u201314 days\nIncludes: Insured return shipping\nNotes: Customer pays inbound shipping; Boldr covers return",
           "metadata": {
-            "source_file": "rate_card_servicing",
+            "section": "servicing_pricing",
             "category": "servicing",
             "turnaround": "Add 7\u201314 days",
-            "section": "servicing_pricing",
             "price_sgd": 25.0,
-            "includes": "Insured return shipping",
             "notes": "Customer pays inbound shipping; Boldr covers return",
-            "service_tier": "International Service (shipping surcharge)"
+            "source_file": "rate_card_servicing",
+            "service_tier": "International Service (shipping surcharge)",
+            "includes": "Insured return shipping"
           },
           "distance": 0.55095387,
           "confidence": 0.44904613000000004
@@ -359,11 +382,11 @@
           "id": "faq_general_29",
           "content": "FAQ (General)\nQ: What is the warranty on Boldr watches?\nA: All Boldr watches come with a 2-year",
           "metadata": {
-            "question": "What is the warranty on Boldr watches?",
             "source_file": "faq_document",
-            "section": "faq_general",
+            "question": "What is the warranty on Boldr watches?",
             "category": "faq",
-            "answer": "All Boldr watches come with a 2-year"
+            "answer": "All Boldr watches come with a 2-year",
+            "section": "faq_general"
           },
           "distance": 0.5551568,
           "confidence": 0.4448432
@@ -373,14 +396,14 @@
         "id": "servicing_full_service_premium",
         "content": "BOLDR Servicing: Full Service \u2014 Premium\nPrice: SGD 220\nTurnaround: 14\u201321\nIncludes: All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn\nNotes: Includes 12-month service warranty",
         "metadata": {
-          "category": "servicing",
-          "notes": "Includes 12-month service warranty",
-          "source_file": "rate_card_servicing",
-          "section": "servicing_pricing",
           "turnaround": "14\u201321",
-          "service_tier": "Full Service \u2014 Premium",
           "price_sgd": 220.0,
-          "includes": "All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn"
+          "source_file": "rate_card_servicing",
+          "service_tier": "Full Service \u2014 Premium",
+          "category": "servicing",
+          "includes": "All Standard items + case deep polish, crystal replacement (if scratched), new crown and pushers if worn",
+          "notes": "Includes 12-month service warranty",
+          "section": "servicing_pricing"
         },
         "distance": 0.50588214,
         "confidence": 0.49411786
@@ -416,7 +439,7 @@
       "question_type": "product_general",
       "persona": "prospect",
       "is_answerable": false,
-      "message": "Your message has been processed. We'll get back to you shortly!"
+      "message": "Thank you for reaching out to BOLDR. Your message has been processed and our team will follow up within 24 hours."
     },
     "intent": {
       "ticket_id": "TKT-72535",
@@ -436,12 +459,12 @@
           "id": "engraving_caseback_engraving_per_additional_character_beyond_40_",
           "content": "BOLDR Engraving Service: Caseback engraving \u2014 per additional character (beyond 40)\nPrice: SGD 1.5\nNotes: Max 60 characters total",
           "metadata": {
-            "price_sgd": 1.5,
-            "category": "engraving",
-            "source_file": "rate_card_engraving",
             "service": "Caseback engraving \u2014 per additional character (beyond 40)",
+            "section": "engraving_pricing",
+            "category": "engraving",
             "notes": "Max 60 characters total",
-            "section": "engraving_pricing"
+            "source_file": "rate_card_engraving",
+            "price_sgd": 1.5
           },
           "distance": 0.5626002,
           "confidence": 0.4373998
@@ -450,11 +473,11 @@
           "id": "faq_general_32",
           "content": "FAQ (General)\nQ: Do you offer bulk/corporate pricing?\nA: Yes. For orders of 10 or more watches,",
           "metadata": {
-            "section": "faq_general",
             "category": "faq",
-            "question": "Do you offer bulk/corporate pricing?",
             "source_file": "faq_document",
-            "answer": "Yes. For orders of 10 or more watches,"
+            "answer": "Yes. For orders of 10 or more watches,",
+            "question": "Do you offer bulk/corporate pricing?",
+            "section": "faq_general"
           },
           "distance": 0.56661963,
           "confidence": 0.43338036999999996
@@ -463,11 +486,11 @@
           "id": "engraving_multi_line_engraving_2_lines_",
           "content": "BOLDR Engraving Service: Multi-line engraving (2 lines)\nPrice: SGD 35.0\nNotes: Includes up to 30 characters total across both lines",
           "metadata": {
-            "notes": "Includes up to 30 characters total across both lines",
-            "source_file": "rate_card_engraving",
-            "section": "engraving_pricing",
             "price_sgd": 35.0,
+            "section": "engraving_pricing",
+            "notes": "Includes up to 30 characters total across both lines",
             "service": "Multi-line engraving (2 lines)",
+            "source_file": "rate_card_engraving",
             "category": "engraving"
           },
           "distance": 0.57094216,
@@ -478,12 +501,12 @@
         "id": "engraving_caseback_engraving_per_additional_character_beyond_40_",
         "content": "BOLDR Engraving Service: Caseback engraving \u2014 per additional character (beyond 40)\nPrice: SGD 1.5\nNotes: Max 60 characters total",
         "metadata": {
-          "price_sgd": 1.5,
-          "category": "engraving",
-          "source_file": "rate_card_engraving",
           "service": "Caseback engraving \u2014 per additional character (beyond 40)",
+          "section": "engraving_pricing",
+          "category": "engraving",
           "notes": "Max 60 characters total",
-          "section": "engraving_pricing"
+          "source_file": "rate_card_engraving",
+          "price_sgd": 1.5
         },
         "distance": 0.5626002,
         "confidence": 0.4373998
