@@ -319,7 +319,9 @@ BOLDR/
 │   ├── configuration.md         # Configuration reference
 │   ├── operations.md             # Operational runbook
 │   ├── rubric_checklist.md      # Competition rubric self-assessment
+│   ├── rubric_self_assessment.md # Detailed feature-by-feature scoring with value for judges
 │   ├── architecture.md          # Architecture diagrams and data flow
+│   ├── BOLDR-Channel-Integrations.md  # Production channel setup guide (WhatsApp, Instagram, Gmail, Chat)
 │   └── demo_script.md           # 5-minute demo video script
 │
 ├── scripts/                     # Utility scripts
@@ -358,8 +360,59 @@ The BOLDR challenge provides 6 files:
 | [Demo Script](docs/demo_script.md) | 5-minute demo video walkthrough with timestamps |
 | [Rubric Checklist](docs/rubric_checklist.md) | Competition rubric self-assessment with evidence |
 | [Rubric Self-Assessment](docs/rubric_self_assessment.md) | Detailed feature-by-feature scoring with value for judges |
+| [Channel Integrations](docs/BOLDR-Channel-Integrations.md) | Production setup for WhatsApp, Instagram, Gmail, Chat — step-by-step with testing |
 | [Project Plan](project_plan.md) | Full 13-section project plan |
 | [Operations Runbook](docs/operations.md) | Operational procedures and troubleshooting |
+
+---
+
+## 📡 Channel Integrations
+
+BOLDR supports **4 customer channels** with production-ready webhook receivers. For the competition demo, all channels work via internal FastAPI webhooks — **zero external credentials required**. For production deployment, each channel has a step-by-step setup guide:
+
+| Channel | Integration Method | Cost/Mo | Setup Guide |
+|---|---|---|---|
+| **WhatsApp** | Meta Business API webhook | SGD 15-30 | [WhatsApp Setup](docs/BOLDR-Channel-Integrations.md#1-whatsapp-business-api-setup) |
+| **Instagram** | Instagram Graph API webhook | Free | [Instagram Setup](docs/BOLDR-Channel-Integrations.md#2-instagram-graph-api-setup) |
+| **Email** | Gmail IMAP polling or Mailgun webhook | Free / SGD 15 | [Email Setup](docs/BOLDR-Channel-Integrations.md#3-email-gmail-setup) |
+| **Chat** | Direct POST to `/api/v1/intake` | Free | [Chat Setup](docs/BOLDR-Channel-Integrations.md#4-chat-widget-setup) |
+
+### Quick Test (No Credentials Needed)
+
+```bash
+# WhatsApp webhook verification
+curl "http://localhost:8000/api/v1/channels/whatsapp/webhook?hub.mode=subscribe&hub.challenge=test&hub.verify_token=boldr_verify_2026"
+
+# Instagram webhook verification
+curl "http://localhost:8000/api/v1/channels/instagram/webhook?hub.mode=subscribe&hub.challenge=test&hub.verify_token=boldr_verify_2026"
+
+# Email webhook
+curl -X POST http://localhost:8000/api/v1/channels/email/webhook \
+  -H "Content-Type: application/json" \
+  -d '{"from_email": "caleb@example.com", "subject": "Strap safety", "body_text": "Are your straps BPA-free?"}'
+
+# Chat intake
+curl -X POST http://localhost:8000/api/v1/intake \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Are your straps BPA-free?", "channel": "chat", "sender_name": "Caleb"}'
+```
+
+### PII Stripping
+
+GDPR/PDPA-compliant PII redaction is configurable (default OFF for competition demo):
+
+```bash
+# Check PII status
+curl http://localhost:8000/api/v1/pii/status
+
+# Strip PII on-demand
+curl -X POST "http://localhost:8000/api/v1/pii/strip?text=My+email+is+john@example.com&enabled=true"
+
+# Enable globally in .env
+PII_STRIP_ENABLED=true
+```
+
+Full production setup guide with credential configuration, SSL/HTTPS, and testing checklists: **[BOLDR-Channel-Integrations.md](docs/BOLDR-Channel-Integrations.md)**
 
 ---
 
