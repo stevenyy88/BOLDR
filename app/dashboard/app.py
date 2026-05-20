@@ -6,12 +6,13 @@ Channel Analytics, Theme Visualisation, KB Management, Audit Log
 Author: Steve Ng, Founder and CEO — Digital Futures Consultancy LLP (T17LL1937H)
 """
 
+import os
 import streamlit as st
 import json
 import requests
 from datetime import datetime
 
-API_BASE = "http://localhost:8000/api/v1"
+API_BASE = os.environ.get("BOLDR_API_URL", "http://localhost:8001/api/v1")
 
 st.set_page_config(
     page_title="BOLDR Customer Intelligence Engine",
